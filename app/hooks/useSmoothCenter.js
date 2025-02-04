@@ -1,16 +1,16 @@
 import { useEffect, useRef } from 'react';
 import { useScroll } from '../context/ScrollContext';
 
-const SMOOTH_SECTIONS = ['hero', 'welcome', 'mentor', 'meet-tia'];
+const SMOOTH_SECTIONS = ['hero', 'welcome', 'mentor', 'meet-tia', 'coming-soon'];
 
 export function useSmoothCenter(activeSection, options = {}) {
   const {
-    threshold = 50,
+    threshold = 0,
     smoothness = 'smooth',
     debounceTime = 150
   } = options;
 
-  const { meetTiaProgress } = useScroll();
+  const { comingSoonProgress } = useScroll();
   const scrollTimeout = useRef(null);
   const isScrolling = useRef(false);
 
@@ -44,7 +44,8 @@ export function useSmoothCenter(activeSection, options = {}) {
       const windowCenter = window.innerHeight / 2;
       const offset = elementCenter - windowCenter;
 
-      if (Math.abs(offset) > threshold) {
+      // Always center when scrolling stops, but only if there's any offset
+      if (offset !== 0) {
         window.scrollBy({
           top: offset,
           behavior: smoothness
@@ -61,5 +62,5 @@ export function useSmoothCenter(activeSection, options = {}) {
         clearTimeout(scrollTimeout.current);
       }
     };
-  }, [activeSection, threshold, smoothness, debounceTime, meetTiaProgress]);
+  }, [activeSection, threshold, smoothness, debounceTime, comingSoonProgress]);
 }

@@ -1,13 +1,17 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import PropTypes from 'prop-types';
-import { useSpring, animated } from '@react-spring/three';
+import { useFrame } from '@react-three/fiber';
 
-export default function WallMeetTia({ width = 10, height = 8.8, holeRadius = 1, color = "#D2DBCD" }) {
-  const [isAnimating, setIsAnimating] = useState(false);
-
+export default function WallMeetTia({ 
+  width = 10, 
+  height = 8.8, 
+  holeRadius = 1, 
+  color = "#D2DBCD",
+  wireframe = false
+}) {
   const shape = useMemo(() => {
     const shape = new THREE.Shape();
     shape.moveTo(-width / 2, -height / 2);
@@ -24,29 +28,45 @@ export default function WallMeetTia({ width = 10, height = 8.8, holeRadius = 1, 
     return shape;
   }, [width, height, holeRadius]);
 
-  // Initial position aligned with meetTia camera at (-5, -14, 8)
-  const initialPosition = [-0.2, -14, 4]; // z = 4 to be in front of camera (which is at z = 8)
-  const animatedPosition = [-5, -14, 7.5]; // Closer to camera when animated
+  const ringRef = useRef();
 
-  const springs = useSpring({
-    position: isAnimating ? animatedPosition : initialPosition,
-    config: { mass: 1, tension: 280, friction: 60 }
+  // Animate the ring glow with a more dramatic pulse
+  useFrame((state) => {
+    if (ringRef.current) {
+      const time = state.clock.getElapsedTime();
+      // More dramatic pulse with smoother transition
+      ringRef.current.material.emissiveIntensity = 2 + Math.sin(time * 1.5) * 0.8;
+      // Subtle scale animation
+      ringRef.current.scale.setScalar(1 + Math.sin(time * 1.5) * 0.05);
+    }
   });
 
   return (
-    <animated.mesh
-      rotation={[0, Math.PI*-0.28, 0]} // Match camera rotation
-      position={springs.position}
-      onClick={() => setIsAnimating(!isAnimating)}
-    >
-      <extrudeGeometry args={[shape, { depth: 0.1, bevelEnabled: false }]} />
-      <meshStandardMaterial
-        color={color}
-        side={THREE.DoubleSide}
-        metalness={0.1}
-        roughness={0.8}
-      />
-    </animated.mesh>
+    <group>
+      <mesh>
+        <extrudeGeometry args={[shape, { depth: 0.1, bevelEnabled: false }]} />
+        <meshStandardMaterial
+          color={color}
+          side={THREE.DoubleSide}
+          metalness={0.1}
+          roughness={0.8}
+          wireframe={wireframe}
+        />
+      </mesh>
+
+      {/* Enhanced green glowing ring */}
+      <mesh ref={ringRef} position={[0, 0, 0.01]}>
+        <torusGeometry args={[holeRadius + 0.15, 0.08, 32, 64]} />
+        <meshStandardMaterial
+          color="#00ff88"
+          emissive="#00ff88"
+          emissiveIntensity={2}
+          toneMapped={false}
+          metalness={0.5}
+          roughness={0.2}
+        />
+      </mesh>
+    </group>
   );
 }
 
@@ -55,4 +75,5 @@ WallMeetTia.propTypes = {
   height: PropTypes.number,
   holeRadius: PropTypes.number,
   color: PropTypes.string,
+  wireframe: PropTypes.bool
 };

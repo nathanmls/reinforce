@@ -1,25 +1,35 @@
 'use client';
 
-import dynamic from 'next/dynamic';
+import { forwardRef, useEffect } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { Suspense } from 'react';
+import HomeMainScene from './HomeMainScene';
 
-// Import Canvas with no SSR
-const Canvas = dynamic(
-  () => import('@react-three/fiber').then((mod) => mod.Canvas),
-  { ssr: false }
-);
+const MainScene3D = forwardRef((props, ref) => {
+  // Add debug log to check ref
+  useEffect(() => {
+    console.log('[MainScene3D] Received ref:', ref);
+  }, [ref]);
 
-// Import HomeMainScene with no SSR
-const HomeMainScene = dynamic(
-  () => import('./HomeMainScene'),
-  { ssr: false }
-);
-
-export default function MainScene3D() {
   return (
-    <div className="fixed inset-0 -z-10">
-      <Canvas>
-        <HomeMainScene />
+    <div className="fixed inset-0 w-full h-full">
+      <Canvas
+        camera={{ 
+          position: [-5, -7, 8],
+          fov: 75,
+          near: 0.1,
+          far: 1000
+        }}
+        shadows
+      >
+        <Suspense fallback={null}>
+          <HomeMainScene ref={ref} />
+        </Suspense>
       </Canvas>
     </div>
   );
-}
+});
+
+MainScene3D.displayName = 'MainScene3D';
+
+export default MainScene3D;

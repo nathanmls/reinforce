@@ -1,10 +1,10 @@
 /**
  * MeetTiaSection Component
- * 
+ *
  * A section that introduces Tia, the virtual mentor, with an interactive 3D scene
  * and transition effects. This component combines 2D UI elements with a 3D scene
  * to create an engaging introduction experience.
- * 
+ *
  * Features:
  * - Interactive 3D scene with transition effects
  * - Smooth opacity transitions for UI elements
@@ -12,100 +12,95 @@
  * - Responsive layout for all screen sizes
  */
 
-'use client';
+"use client";
 
-import { useRef, useState } from 'react';
-// import Link from 'next/link';
-// import TiaScene from '../TiaScene';
-import BalloonTail from '../BalloonTail';
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import PropTypes from "prop-types";
+import BalloonTail from "../BalloonTail";
+import { FaArrowCircleLeft } from "react-icons/fa";
 
-export default function MeetTiaSection() {
-  // State for managing transitions and visibility
+export default function MeetTiaSection({ sceneRef, language = "en" }) {
   const [isTransitioned, setIsTransitioned] = useState(false);
-  const [isTextVisible, setIsTextVisible] = useState(true);
-  const sceneRef = useRef(null);
 
-  /**
-   * Handles the start demo button click
-   * Initiates the vignette transition and hides the text content
-   */
-  const handleExperimenteClick = () => {
-    if (sceneRef.current) {
-      setIsTextVisible(false);
-      sceneRef.current.transitionVignette();
-    }
+  useEffect(() => {}, []);
+
+  const handleTransition = () => {
+    setIsTransitioned(true);
+    setTimeout(() => {
+      if (sceneRef.current) {
+        sceneRef.current.transitionWallMeetTia();
+      }
+    }, 500);
   };
 
-  /**
-   * Handles the back button click
-   * Reverses the transition and shows the text content after a delay
-   */
-  const handleVoltarClick = () => {
+  const handleBack = () => {
     if (sceneRef.current) {
-      setIsTransitioned(false);
-      sceneRef.current.reverseTransition();
-      // Delay showing the text until the transition is complete
+      sceneRef.current.reverseWallMeetTiaTransition();
       setTimeout(() => {
-        setIsTextVisible(true);
-      }, 1000);
+        setIsTransitioned(false);
+      }, 500);
     }
-  };
-
-  /**
-   * Callback for when the transition completes
-   * Updates the transition state to show/hide UI elements
-   */
-  const handleTransitionComplete = (transitioned) => {
-    setIsTransitioned(transitioned);
   };
 
   return (
-    <div id='meet-tia' className="relative bg-gray-900 h-screen bg-opacity-0">
+    <div id="meet-tia" className="relative bg-gray-900 h-screen bg-opacity-0">
       {/* Content Overlay */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className={`max-w-2xl text-center px-6 z-10 transition-opacity duration-500 ${isTextVisible ? 'opacity-100' : 'opacity-0'}`}>
-          {/* Welcome Message */}
-          <h2 className="text-2xl font-bold py-4 px-6 bg-white rounded-xl text-black sm:text-2xl">
-            Oi, eu sou a Tia! Sua Mentora Virtual. <br/>
-            Como posso te ajudar hoje?
-          </h2>
-
-          {/* Decorative BalloonTail */}
-          <div className="align-center flex justify-center w-full text-center" >
-            <BalloonTail 
-              color={'white'} 
-              width={60} 
-              height={15} 
-              className="text-white absolute bg-white color-[#B3D45A] mx-auto -mt-0.5" 
-            />
-          </div>
-
-          {/* Spacer for proper content positioning */}
-          <div className="h-[40vh]" />
-          
-          {/* Action Buttons */}
-          <div className="flex items-center my-12 justify-center gap-x-6">
-            <button
-              onClick={handleExperimenteClick}
-              disabled={isTransitioned}
-              className="rounded-md bg-[#B3D45A] px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#a1c150] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <AnimatePresence>
+          {!isTransitioned && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              className="w-full flex justify-center"
             >
-              Start Demo
-            </button>
-          </div>
-        </div>
+              <div className="flex gap-y-[38vh] flex-col items-center">
+              <div className="bg-white p-6 flex flex-col items-center text-center rounded-xl shadow-lg max-w-xl mx-4 relative">
+                <h2 className="text-xl font-bold text-gray-800">
+                  {language === "en"
+                    ? <>I'm Tia, your AI mentor.<br />I'm here to guide you through your reinforcement learning journey.</>
+                    : <>Eu sou a Tia, sua mentora de IA.<br />Estou aqui para guiá-lo em sua jornada de aprendizado por reforço.</>}
+                </h2>
+                <div className="absolute -bottom-3">
+                  <BalloonTail color="white" />
+                </div>
+              </div>
+              <div className=" py-20">
+                <button
+                  onClick={handleTransition}
+                  className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition-colors duration-300 mb-2"
+                >
+                  {language === "en" ? "Let's Begin!" : "Vamos Começar!"}
+                </button>
+                </div>
+                </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Back Button - Only visible after transition */}
-      <div className={`absolute bottom-6 right-6 transition-opacity duration-500 ${isTransitioned ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-        <button
-          onClick={handleVoltarClick}
-          className="bg-indigo-600 text-white px-5 py-3 rounded-md hover:bg-indigo-500 transition-colors duration-200 flex items-center gap-2 z-50"
-        >
-          <span aria-hidden="true">←</span>
-          Voltar
-        </button>
-      </div>
+      {/* Back Button */}
+      <AnimatePresence>
+        {isTransitioned && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="absolute bottom-4 right-4"
+          >
+            <button
+              onClick={handleBack}
+              className="text-black hover:text-gray-800 font-size-20 transition-colors duration-300 flex items-center gap-2"
+            >
+              <FaArrowCircleLeft />
+              <span>Go Back</span>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

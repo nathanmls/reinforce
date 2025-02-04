@@ -6,10 +6,10 @@ import * as THREE from 'three';
 import { useThree, useFrame } from '@react-three/fiber';
 
 export default function SceneLighting({ 
-  ambientIntensity = 0.6,
-  directionalIntensity = 0.5,
-  pointIntensity = 0.5,
-  spotIntensity = 1,
+  ambientIntensity = 1.2,
+  directionalIntensity = 1.5,
+  pointIntensity = 10,
+  spotIntensity = 30,
   showHelpers = false,
   groupRef 
 }) {
@@ -18,43 +18,58 @@ export default function SceneLighting({
   const cameraLightHelperRef = useRef();
   const pointLightRef = useRef();
   const spotLightRef = useRef();
+  const spotLightHelperRef = useRef();
+  const mainCameraRef = useRef(new THREE.Object3D());
   const { scene, camera } = useThree();
 
   // Update lights to follow the camera and group
   useFrame(() => {
-    if (camera) {
-      // Get camera direction and position
-      const cameraDirection = new THREE.Vector3();
-      camera.getWorldDirection(cameraDirection);
-      const cameraPosition = camera.position.clone();
+    // Store main camera position when not in exploration mode
+    if (!showHelpers) {
+      mainCameraRef.current.position.copy(camera.position);
+      mainCameraRef.current.rotation.copy(camera.rotation);
+    }
 
-      // Update camera light
-      if (cameraLightRef.current) {
-        const lightPosition = cameraPosition.clone();
-        lightPosition.add(cameraDirection.multiplyScalar(-2));
-        lightPosition.y += 2;
-        
-        cameraLightRef.current.position.copy(lightPosition);
-        cameraLightRef.current.target.position.copy(camera.position);
-        cameraLightRef.current.target.updateMatrixWorld();
+    // Always use main camera position for lights
+    const cameraToUse = showHelpers ? mainCameraRef.current : camera;
+    
+    // Get camera direction and position
+    const cameraDirection = new THREE.Vector3();
+    cameraToUse.getWorldDirection(cameraDirection);
+    const cameraPosition = cameraToUse.position.clone();
 
-        if (showHelpers && cameraLightHelperRef.current) {
-          cameraLightHelperRef.current.update();
-        }
+    // Update camera light
+    if (cameraLightRef.current) {
+      const lightPosition = cameraPosition.clone();
+      lightPosition.add(cameraDirection.multiplyScalar(-2));
+      lightPosition.y += 2;
+      
+      cameraLightRef.current.position.copy(lightPosition);
+      cameraLightRef.current.target.position.copy(cameraPosition);
+      cameraLightRef.current.target.updateMatrixWorld();
+
+      if (showHelpers && cameraLightHelperRef.current) {
+        cameraLightHelperRef.current.update();
       }
+    }
 
-      // Update spot light to follow camera
-      if (spotLightRef.current) {
-        const spotOffset = new THREE.Vector3(2, 5, -2);
-        const spotPosition = cameraPosition.clone().add(spotOffset);
-        
-        spotLightRef.current.position.copy(spotPosition);
-        
-        // Calculate target position: slightly ahead of camera
-        const targetOffset = cameraDirection.multiplyScalar(5);
-        const targetPosition = cameraPosition.clone().add(targetOffset);
-        spotLightRef.current.target.position.copy(targetPosition);
-        spotLightRef.current.target.updateMatrixWorld();
+    // Update spot light to follow group with fixed offset
+    if (spotLightRef.current && groupRef?.current) {
+      const groupPosition = new THREE.Vector3();
+      groupRef.current.getWorldPosition(groupPosition);
+      
+      // Position the light above and behind the group
+      const spotOffset = new THREE.Vector3(0, 10, 5); 
+      const spotPosition = groupPosition.clone().add(spotOffset);
+      spotLightRef.current.position.copy(spotPosition);
+      
+      // Target the group position
+      spotLightRef.current.target.position.copy(groupPosition);
+      spotLightRef.current.target.updateMatrixWorld();
+
+      // Update helper if it exists
+      if (showHelpers && spotLightHelperRef.current) {
+        spotLightHelperRef.current.update();
       }
     }
 
@@ -81,6 +96,7 @@ export default function SceneLighting({
   // Create/cleanup helpers
   useEffect(() => {
     if (showHelpers) {
+      // Create helpers
       if (directionalLightRef.current) {
         const dirHelper = new THREE.DirectionalLightHelper(directionalLightRef.current, 5, '#ff0000');
         scene.add(dirHelper);
@@ -97,43 +113,65 @@ export default function SceneLighting({
       if (spotLightRef.current) {
         const spotHelper = new THREE.SpotLightHelper(spotLightRef.current, '#0000ff');
         scene.add(spotHelper);
+        spotLightHelperRef.current = spotHelper;
       }
 
+      // Add main camera helper
+      const mainCameraHelper = new THREE.Object3D();
+      // Add a small cone to represent camera direction
+      const coneGeometry = new THREE.ConeGeometry(0.5, 1, 8);
+      const coneMaterial = new THREE.MeshBasicMaterial({ color: '#ffff00', wireframe: true });
+      const cone = new THREE.Mesh(coneGeometry, coneMaterial);
+      cone.rotation.x = Math.PI / 2;
+      mainCameraHelper.add(cone);
+      mainCameraRef.current.add(mainCameraHelper);
+      scene.add(mainCameraRef.current);
+
+      // Cleanup function
       return () => {
         scene.children = scene.children.filter(child => 
           !(child instanceof THREE.DirectionalLightHelper) &&
           !(child instanceof THREE.PointLightHelper) &&
           !(child instanceof THREE.SpotLightHelper)
         );
+        scene.remove(mainCameraRef.current);
         cameraLightHelperRef.current = null;
+        spotLightHelperRef.current = null;
       };
     }
   }, [scene, showHelpers]);
 
   return (
     <>
-      {/* Ambient light for overall scene brightness */}
-      <ambientLight intensity={ambientIntensity} />
+      {/* Ambient light for base illumination */}
+      <ambientLight 
+        intensity={ambientIntensity} 
+        color="#ffffff"
+      />
       
-      {/* Main directional light for primary shadows */}
+      {/* Directional light for general shadows */}
       <directionalLight
         ref={directionalLightRef}
-        position={[-10, 10, 5]}
+        position={[-5, 5, 5]}
         intensity={directionalIntensity}
         castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
         shadow-camera-far={50}
-        shadow-camera-near={0.1}
-        shadow-camera-left={-15}
-        shadow-camera-right={15}
-        shadow-camera-top={15}
-        shadow-camera-bottom={-15}
-        shadow-bias={-0.0001}
-        shadow-radius={2}
+        shadow-camera-left={-10}
+        shadow-camera-right={10}
+        shadow-camera-top={10}
+        shadow-camera-bottom={-10}
       >
         <primitive object={new THREE.Object3D()} /> {/* Light target */}
       </directionalLight>
+
+      {/* Hemisphere light for subtle color variation */}
+      <hemisphereLight
+        intensity={0.2}
+        color="#ffffff"
+        groundColor="#000000"
+      />
 
       {/* Camera-following fill light */}
       <directionalLight
@@ -169,19 +207,29 @@ export default function SceneLighting({
       {/* Spot light for focused highlights */}
       <spotLight
         ref={spotLightRef}
-        position={[0, 10, 0]}
-        angle={0.4}
-        penumbra={0.8}
+        position={[0, 10, -5]}
         intensity={spotIntensity}
+        angle={Math.PI / 6}
+        penumbra={0.5}
+        decay={1.5}
+        distance={50}
         castShadow
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
         shadow-camera-near={0.1}
-        shadow-camera-far={30}
+        shadow-camera-far={50}
         shadow-bias={-0.0001}
       >
         <primitive object={new THREE.Object3D()} />
       </spotLight>
+
+      {showHelpers && (
+        <>
+          <directionalLightHelper args={[directionalLightRef.current]} />
+          <gridHelper args={[30, 30]} />
+          <axesHelper args={[5]} />
+        </>
+      )}
     </>
   );
 }

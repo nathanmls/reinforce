@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 // import Image from 'next/image';
@@ -29,13 +29,14 @@ import CameraDebug from './components/debug/CameraDebug';
 
 export default function HomePage() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [language, setLanguage] = useState('en'); 
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [language, setLanguage] = useState('en'); 
   const t = translations[language];
   const { user, logout } = useAuth();
   const router = useRouter();
+  const mainSceneRef = useRef(null);
 
   const sections = ['about', 'mentor', 'contact', 'testimonials', 'updates'];
 
@@ -85,6 +86,16 @@ export default function HomePage() {
     }
   };
 
+  // Debug log when component mounts and ref changes
+  useEffect(() => {
+    console.log('[HomePage] Component mounted');
+    console.log('[HomePage] MainScene ref:', mainSceneRef);
+  }, []);
+
+  useEffect(() => {
+    console.log('[HomePage] MainScene ref changed:', mainSceneRef.current);
+  }, [mainSceneRef.current]);
+
   if (loading) {
     return <PreLoader loadingProgress={loadingProgress} />;
   }
@@ -92,7 +103,7 @@ export default function HomePage() {
   return (
     <CameraDebugProvider>
       <div className="relative min-h-screen">
-        <MainScene3D />
+        <MainScene3D ref={mainSceneRef} />
         <div className="relative z-10">
           <FloatingNav sections={sections} translations={t.nav} />
           <Header 
@@ -101,12 +112,12 @@ export default function HomePage() {
             isScrolled={isScrolled}
             setIsLoginModalOpen={setIsLoginModalOpen}
           />
-          <main className=" bg-transparent flex flex-col">
+          <main className="bg-transparent flex flex-col">
             <CameraDebug />
             <HeroSection language={language} />
             <WelcomeSection language={language} />
             <MentorSection language={language} />
-            <MeetTiaSection />
+            <MeetTiaSection sceneRef={mainSceneRef} language={language} />
             <ComingSoonSection />
             <AboutUsSection />
             <TestimonialsSection />

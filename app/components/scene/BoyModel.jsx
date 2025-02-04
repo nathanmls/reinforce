@@ -41,7 +41,7 @@ export default function BoyModel({ wireframe = false }) {
       ref={modelRef}
       object={scene}
       scale={3.5}
-      position={[-5, -7.7, 0]}
+      position={[-4, -7.7, 0]}
       rotation={[0, Math.PI*0.5, 0]}
       castShadow
       receiveShadow

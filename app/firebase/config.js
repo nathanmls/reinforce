@@ -22,17 +22,36 @@ let auth;
 let db;
 let storage;
 
-if (typeof window !== 'undefined') {
-  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-  auth = getAuth(app);
-  db = getFirestore(app);
-  storage = getStorage(app);
-  
-  // Enable persistence
-  setPersistence(auth, browserLocalPersistence)
-    .catch((error) => {
-      console.error('Error setting auth persistence:', error);
-    });
-}
+const initializeFirebase = async () => {
+  if (typeof window === 'undefined') return;
+
+  try {
+    // Initialize or get existing app
+    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+    
+    // Initialize services
+    auth = getAuth(app);
+    db = getFirestore(app);
+    storage = getStorage(app);
+
+    // Enable auth persistence
+    try {
+      await setPersistence(auth, browserLocalPersistence);
+    } catch (error) {
+      console.warn('Auth persistence failed, falling back to default:', error);
+    }
+
+  } catch (error) {
+    console.error('Firebase initialization error:', error);
+    // Set services to null if initialization fails
+    app = null;
+    auth = null;
+    db = null;
+    storage = null;
+  }
+};
+
+// Initialize Firebase when the module is imported
+initializeFirebase();
 
 export { app, auth, db, storage };

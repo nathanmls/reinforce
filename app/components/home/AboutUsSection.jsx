@@ -11,10 +11,10 @@ export default function AboutUsSection() {
             Conheça a Reinforce
           </h2>
           <p className="mt-6 text-lg leading-8 text-gray-300">
-            Dúvidas? Precisa de suporte extra?
+          Reinforce é uma plataforma com IA que te ajuda a aprender mais rápido e de forma mais eficaz.
           </p>
           <p className="mt-4 text-lg leading-8 text-gray-300">
-            Conecte-se com um Professor Online a qualquer momento e obtenha respostas imediatas para seus desafios.
+          Nossa equipe de especialistas em IA trabalha duro para oferecer uma experiência de aprendizado excepcional.
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
             <Link
