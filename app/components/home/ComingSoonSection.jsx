@@ -8,7 +8,7 @@ import WaitlistModal from '../WaitlistModal';
 export default function ComingSoonSection() {
   const [isWaitlistOpen, setIsWaitlistOpen] = useState(false);
   return (
-    <div id='coming-soon' className="bg-[#C7DF88] relative isolate flex items-center h-screen px-6 pt-14 lg:px-8">
+    <div id='coming-soon' className="bg-[#F2B035] relative isolate flex items-center h-screen px-6 pt-14 lg:px-8">
       <div className="mx-auto flex flex-col w-full max-w-7xl items-start">
         <div className="max-w-2xl text-left">
           <h2 className="text-3xl font-bold tracking-tight text-black uppercase sm:text-4xl">

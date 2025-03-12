@@ -15,8 +15,8 @@
 
 'use client';
 
-import { useRef, useEffect } from 'react';
-import { useGLTF } from "@react-three/drei";
+import { useRef, useEffect, useState } from 'react';
+import { useGLTF, useTexture } from "@react-three/drei";
 import * as THREE from 'three';
 import PropTypes from 'prop-types';
 
@@ -44,8 +44,9 @@ export default function TiaPortalModel({
   clippingPlanes = []
 }) {
   // Load the 3D model
-  const { scene } = useGLTF('/models/TiaChar.glb');
+  const { scene, materials } = useGLTF('/models/TiaChar.glb');
   const modelRef = useRef();
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // Create a cloned scene if needed
   const modelScene = clone ? scene.clone(true) : scene;
@@ -53,6 +54,9 @@ export default function TiaPortalModel({
   // Configure shadows and materials
   useEffect(() => {
     if (!modelScene) return;
+
+    // Flag to track if we need to force a texture update
+    let needsTextureUpdate = false;
 
     modelScene.traverse((child) => {
       if (child.isMesh) {
@@ -72,63 +76,62 @@ export default function TiaPortalModel({
           child.material.shadowSide = THREE.DoubleSide;
           child.material.wireframe = wireframe;
           child.material.clippingPlanes = clippingPlanes;
+          child.material.needsUpdate = true; // Force material update
           
           // Handle specific material types
           if (child.material instanceof THREE.MeshStandardMaterial) {
-            // Enhance PBR material properties for better visibility
-            child.material.roughness = 0.2;  // Lower roughness for more shine
-            child.material.metalness = 0.3;  // Increased metalness for better light response
-            child.material.envMapIntensity = 2.0;  // Stronger environment reflection
+            // Adjust PBR material properties for more natural appearance
+            child.material.roughness = 0.7;  // Higher roughness for less shine
+            child.material.metalness = 0.1;  // Lower metalness for more natural appearance
+            child.material.envMapIntensity = 0.8;  // Reduced environment reflection
             
             // Normal map handling with stronger effect
             if (child.material.normalMap) {
-              child.material.normalScale.set(1.5, 1.5);
+              child.material.normalScale.set(1.5, 1.5); 
+              child.material.normalMap.needsUpdate = true;
             }
 
             // AO map handling with reduced effect for brighter appearance
             if (child.material.aoMap) {
               child.material.aoMapIntensity = 0.5;
+              child.material.aoMap.needsUpdate = true;
             }
 
             // Enhanced emissive properties
             if (child.material.emissiveMap) {
               child.material.emissive.set(1, 1, 1);
               child.material.emissiveIntensity = 0.6;
+              child.material.emissiveMap.needsUpdate = true;
             }
 
-            // Increase material brightness
+            // Ensure map is properly loaded
+            if (child.material.map) {
+              child.material.map.needsUpdate = true;
+              child.material.map.colorSpace = THREE.SRGBColorSpace;
+              needsTextureUpdate = true;
+            }
+
+            // Preserve original material color without brightening
             if (child.material.color) {
-              const color = child.material.color;
-              // Brighten the base color while preserving hue
-              color.multiplyScalar(1.3);
+              // No color adjustment needed
+              // The original color from the model will be used
             }
           }
         }
       }
     });
+
+    // Force a texture update if needed
+    if (needsTextureUpdate) {
+      THREE.TextureLoader.prototype.crossOrigin = '';
+      setIsLoaded(true);
+    }
   }, [modelScene, clone, wireframe, clippingPlanes]);
 
   return (
     <group ref={modelRef} position={position} rotation={rotation} scale={scale}>
       <primitive object={modelScene} />
-      {/* Add local lighting for better visibility */}
-      <pointLight
-        intensity={1}
-        distance={10}
-        position={[0, 2, 2]}
-        castShadow
-      />
-      <pointLight
-        intensity={0.5}
-        distance={8}
-        position={[-2, 1, -2]}
-        castShadow
-      />
-      <hemisphereLight
-        intensity={0.3}
-        groundColor="#000000"
-        color="#ffffff"
-      />
+      {/* Removed local lighting to prevent overexposure */}
     </group>
   );
 }

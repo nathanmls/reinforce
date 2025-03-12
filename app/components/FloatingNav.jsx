@@ -69,7 +69,7 @@ export default function FloatingNav() {
       setShowHighlight(true);
       const timer = setTimeout(() => {
         setShowHighlight(false);
-      }, 2000);
+      }, 1500);
       return () => clearTimeout(timer);
     }
   }, [activeSection, isHovered]);
@@ -98,9 +98,9 @@ export default function FloatingNav() {
               >
                 <span
                   className={`
-                    session-name mr-4 text-sm border-2 border-gray-200 transition-all hover:opacity-100 hover:text-gray-800 hover:py-2 hover:bg-white/100 duration-300 px-3 py-1 bg-white/10 rounded-lg
+                    session-name mr-4 text-sm border-2 border-gray-200 transition-all hover:opacity-100 hover:text-gray-800 hover:py-2 hover:bg-[#B3D45A] hover:border-white duration-300 px-3 py-1 bg-black/10 rounded-xl
                     ${isHovered ? 'opacity-100' : 'opacity-0'}
-                    ${activeSection === section ? "text-gray-800 bg-white/100 px-4 py-2 rounded-lg" : "text-gray-600"}
+                    ${activeSection === section ? "text-gray-800 bg-white/100 px-4 py-2 rounded-lg" : "text-white"}
                     ${
                       (!isHovered && activeSection === section && showHighlight)
                         ? "opacity-100 border-gray-200"

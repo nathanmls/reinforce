@@ -22,24 +22,11 @@ export default function WallMeetTia({
 
     const hole = new THREE.Path();
     hole.moveTo(0, 0);
-    hole.absarc(0, 0, holeRadius, 0, Math.PI * 2, true, 128);
+    hole.absarc(0, 0, holeRadius, 0, Math.PI * 2, true, 64);
     shape.holes.push(hole);
 
     return shape;
   }, [width, height, holeRadius]);
-
-  const ringRef = useRef();
-
-  // Animate the ring glow with a more dramatic pulse
-  useFrame((state) => {
-    if (ringRef.current) {
-      const time = state.clock.getElapsedTime();
-      // More dramatic pulse with smoother transition
-      ringRef.current.material.emissiveIntensity = 2 + Math.sin(time * 1.5) * 0.8;
-      // Subtle scale animation
-      ringRef.current.scale.setScalar(1 + Math.sin(time * 1.5) * 0.05);
-    }
-  });
 
   return (
     <group>
@@ -54,13 +41,13 @@ export default function WallMeetTia({
         />
       </mesh>
 
-      {/* Enhanced green glowing ring */}
-      <mesh ref={ringRef} position={[0, 0, 0.01]}>
-        <torusGeometry args={[holeRadius + 0.15, 0.08, 32, 64]} />
+      {/* Static white ring */}
+      <mesh position={[0, 0, 0.1]}>
+        <torusGeometry args={[holeRadius - 0.04, 0.04, 32, 64]} />
         <meshStandardMaterial
-          color="#00ff88"
-          emissive="#00ff88"
-          emissiveIntensity={2}
+          color="#ffffff"
+          emissive="#ffffff"
+          emissiveIntensity={1}
           toneMapped={false}
           metalness={0.5}
           roughness={0.2}

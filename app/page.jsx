@@ -103,8 +103,8 @@ export default function HomePage() {
   return (
     <CameraDebugProvider>
       <div className="relative min-h-screen">
-        <MainScene3D ref={mainSceneRef} />
-        <div className="relative z-10">
+        <MainScene3D ref={mainSceneRef} />  
+        <div className="relative pointer-events-none z-10">
           <FloatingNav sections={sections} translations={t.nav} />
           <Header 
             language={language}

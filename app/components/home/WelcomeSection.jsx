@@ -49,7 +49,7 @@ export default function WelcomeSection({ language = 'en' }) {
             </div>
           </dl>
         </div>
-        <div className="mt-10 flex items-center justify-start gap-x-6">
+        <div className="mt-10 pointer-events-auto flex items-center justify-start gap-x-6">
           <button
             onClick={() => setIsWaitlistOpen(true)}
             className="rounded-full bg-[#FFD12A] px-3.5 py-2.5 text-sm font-semibold text-black shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"

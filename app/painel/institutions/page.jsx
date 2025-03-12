@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { USER_ROLES } from '../../config/roles';
+import MentorAssignmentModal from '../../components/modals/MentorAssignmentModal';
 
 const InstitutionsPage = () => {
   const { user, userRole } = useAuth();
@@ -11,6 +12,8 @@ const InstitutionsPage = () => {
   const [tabValue, setTabValue] = useState('all');
   const [institutions, setInstitutions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedInstitutionId, setSelectedInstitutionId] = useState(null);
+  const [isMentorModalOpen, setIsMentorModalOpen] = useState(false);
 
   useEffect(() => {
     // Check if user is admin
@@ -150,18 +153,49 @@ const InstitutionsPage = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button
-                    onClick={() => handleViewDetails(institution.id)}
-                    className="text-blue-600 hover:text-blue-900"
-                  >
-                    View Details
-                  </button>
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={() => handleViewDetails(institution.id)}
+                      className="text-blue-600 hover:text-blue-900"
+                    >
+                      View Details
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedInstitutionId(institution.id);
+                        setIsMentorModalOpen(true);
+                      }}
+                      className="text-green-600 hover:text-green-900"
+                    >
+                      Manage Mentors
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* Mentor Assignment Modal */}
+      <MentorAssignmentModal
+        isOpen={isMentorModalOpen}
+        onClose={() => {
+          setIsMentorModalOpen(false);
+          setSelectedInstitutionId(null);
+        }}
+        institutionId={selectedInstitutionId}
+        onUpdate={() => {
+          // Refresh institution data if needed
+          const loadData = async () => {
+            // Simulating API call
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            setInstitutions(mockInstitutions);
+            setLoading(false);
+          };
+          loadData();
+        }}
+      />
     </div>
   );
 };

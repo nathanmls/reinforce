@@ -94,11 +94,11 @@ export default function Header({
         isScrolled || isLoginPage 
           ? 'bg-gray-900/95 shadow-lg mx-2 mt-2 rounded-2xl w-[calc(100%-1rem)]' 
           : 'bg-white/50 w-full'
-      } ${(!isVisible || !isActive) && !isNearTop && !isDropdownHovered && !isLangSelectorHovered && isScrolled ? '-translate-y-full -mt-1' : 'translate-y-0'}`}
+      } ${(!isVisible || !isActive) && !isNearTop && !isDropdownHovered && !isLangSelectorHovered && isScrolled ? '-translate-y-full shadow-none -mt-2' : 'translate-y-0'}`}
       onMouseEnter={resetInactivityTimer}
       onMouseMove={resetInactivityTimer}
     >
-      <div className="container mx-auto px-4 py-4">
+      <div className="container pointer-events-auto mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-4">
             <Logo maxW={150} color={isScrolled || isLoginPage ? '#FFFFFF' : '#222222'} />
@@ -111,7 +111,7 @@ export default function Header({
             />
             {!isLoginPage && user ? (
               <div className="relative group">
-                <button className={`flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors hover:text-white ${ isScrolled || isLoginPage ? 'text-white' : 'text-black' }`}>
+                <button className={`flex items-center space-x-2 px-4 py-2 rounded-xl hover:bg-gray-800 transition-colors hover:text-white ${ isScrolled || isLoginPage ? 'text-white' : 'text-black' }`}>
                   <div className="flex items-center space-x-3">
                     {userProfile?.profileImage ? (
                       <Image
@@ -147,12 +147,12 @@ export default function Header({
                 <div 
                   onMouseEnter={() => setIsDropdownHovered(true)}
                   onMouseLeave={() => setIsDropdownHovered(false)}
-                  className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                  className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                   {menuItems.map((item, index) => (
                     <Link
                       key={index}
                       href={item.path}
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 rounded-xl hover:bg-gray-100"
                     >
                       <span className="w-5 h-5 mr-3">{item.icon}</span>
                       {item.name}
@@ -182,7 +182,7 @@ export default function Header({
             ) : (
               <button
                 onClick={() => setIsLoginModalOpen(true)}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="bg-blue-600 text-white px-6 py-2 rounded-xl hover:bg-blue-700 transition-colors"
               >
                 {t.nav.login}
               </button>

@@ -1,11 +1,33 @@
 'use client';
+
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useConversation } from '@11labs/react';
 import { useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import { VoiceSphere } from './VoiceSphere';
+import { useAuth } from '../context/AuthContext';
+import dynamic from 'next/dynamic';
+
+// Import TiaCharScene with dynamic import to avoid SSR issues
+const TiaCharScene = dynamic(() => import('./TiaCharScene'), { ssr: false });
+
+// Client-only wrapper for TiaCharScene to handle "window is not defined" errors
+const ClientTiaCharScene = ({ 
+  isActive, 
+  intensity = 1,
+  institutionId 
+}: { 
+  isActive: boolean; 
+  intensity?: number;
+  institutionId?: string;
+}) => {
+  return (
+    <div className="w-full h-full">
+      <TiaCharScene isActive={isActive} intensity={intensity} />
+    </div>
+  );
+};
 
 type Message = {
   role: 'user' | 'agent';
@@ -23,39 +45,8 @@ type ConversationState = {
   audioBufferSize: number;
 };
 
-const VoiceWaveform = ({ isActive, intensity = 1 }: { isActive: boolean; intensity?: number }) => {
-  return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="w-32 h-32">
-        <Canvas camera={{ position: [0, 0, 5] }}>
-          <ambientLight intensity={0.5} />
-          <pointLight position={[10, 10, 10]} />
-          <VoiceSphere intensity={isActive ? intensity : 0} />
-          <OrbitControls enableZoom={false} />
-        </Canvas>
-      </div>
-      <div className="flex items-center gap-1 h-8">
-        {[...Array(4)].map((_, i) => (
-          <motion.div
-            key={i}
-            animate={{
-              height: isActive ? ['40%', `${80 * intensity}%`, '40%'] : '40%',
-            }}
-            transition={{
-              duration: 0.8,
-              repeat: Infinity,
-              delay: i * 0.1,
-              ease: "easeInOut"
-            }}
-            className="w-1 bg-blue-500 rounded-full"
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
-
-export default function VoiceAssistant() {
+const VoiceAssistant = () => {
+  const { user } = useAuth();
   const [state, setState] = useState<ConversationState>({
     messages: [],
     error: null,
@@ -245,108 +236,125 @@ export default function VoiceAssistant() {
   }, [conversation]);
 
   return (
-    <div className="flex flex-col items-center gap-4 w-full max-w-2xl mx-auto p-4">
-      <div className="flex gap-2">
-        <button
-          onClick={startConversation}
-          disabled={conversation.status === 'connected' || state.isLoading}
-          className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300 hover:bg-blue-600 transition-colors flex items-center gap-2"
-        >
-          {state.isLoading && conversation.status !== 'connected' ? (
-            <>
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
-              />
-              Connecting...
-            </>
-          ) : (
-            'Start Conversation'
-          )}
-        </button>
-        <button
-          onClick={stopConversation}
-          disabled={conversation.status !== 'connected' || state.isLoading}
-          className="px-4 py-2 bg-red-500 text-white rounded disabled:bg-gray-300 hover:bg-red-600 transition-colors"
-        >
-          {state.isLoading && conversation.status === 'connected' ? 'Disconnecting...' : 'Stop Conversation'}
-        </button>
+    <div className="flex flex-col md:flex-row h-full w-full">
+      {/* TiaChar Scene - Takes full height and fills available width */}
+      <div className="w-full md:w-1/2 h-[400px] md:h-full">
+        <ClientTiaCharScene 
+          isActive={conversation.status === 'connected'} 
+          intensity={state.messages.length > 0 ? 1 : 0.5}
+          institutionId={user?.institutionId}
+        />
       </div>
 
-      {/* Connection Status */}
-      <div className="flex items-center gap-4">
-        <p className="text-gray-700">Status: {conversation.status}</p>
-        {state.latency > 0 && (
-          <p className="text-sm text-gray-500">
-            Latency: {state.latency.toFixed(0)}ms
-          </p>
-        )}
-        {conversation.status === 'connected' && (
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">You:</span>
-              <motion.div
-                animate={{
-                  scale: !conversation.isSpeaking ? [1, 1.2, 1] : 1,
-                  opacity: !conversation.isSpeaking ? [0.5, 1, 0.5] : 0.5,
-                }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="w-3 h-3 rounded-full bg-green-500"
-              />
+      {/* Chat Interface */}
+      <div className="w-full md:w-1/2 h-full flex flex-col">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {state.messages.map((message, index) => (
+            <div
+              key={index}
+              className={`flex ${
+                message.role === 'user' ? 'justify-end' : 'justify-start'
+              }`}
+            >
+              <div
+                className={`max-w-[80%] p-3 rounded-lg ${
+                  message.role === 'user'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-200 text-gray-800'
+                } ${message.tentative ? 'opacity-70' : ''}`}
+              >
+                {message.message}
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">AI:</span>
-              <VoiceWaveform 
-                isActive={conversation.isSpeaking} 
-                intensity={Math.min(1, 10000 / state.audioBufferSize)}
-              />
+          ))}
+          <div ref={chatEndRef} />
+        </div>
+
+        <div className="p-4 border-t border-gray-200">
+          {state.error && (
+            <div className="mb-4 p-3 bg-red-100 text-red-800 rounded-lg">
+              Error: {state.error}
             </div>
+          )}
+
+          <div className="flex justify-center items-center">
+            {conversation.status === 'disconnected' ? (
+              <button
+                onClick={startConversation}
+                disabled={state.isLoading}
+                className="px-6 py-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center"
+              >
+                {state.isLoading ? (
+                  <>
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Connecting...
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      className="w-5 h-5 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                      ></path>
+                    </svg>
+                    Start Conversation
+                  </>
+                )}
+              </button>
+            ) : (
+              <button
+                onClick={stopConversation}
+                className="px-6 py-3 bg-red-600 text-white rounded-full shadow-lg hover:bg-red-700 transition-colors flex items-center"
+              >
+                <svg
+                  className="w-5 h-5 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  ></path>
+                </svg>
+                End Conversation
+              </button>
+            )}
           </div>
-        )}
-      </div>
-
-      {/* Error Message */}
-      {state.error && (
-        <motion.div 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full p-4 bg-red-100 border border-red-300 rounded text-red-700"
-        >
-          {state.error}
-          {state.retryCount < 3 && (
-            <span className="ml-2">
-              Retrying in {Math.min(2 * Math.pow(2, state.retryCount), 10)} seconds...
-            </span>
-          )}
-        </motion.div>
-      )}
-
-      {/* Chat History */}
-      <div className="w-full mt-4 space-y-4 max-h-[500px] overflow-y-auto p-4 bg-gray-50 rounded">
-        {state.messages.map((msg, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className={`p-3 rounded ${
-              msg.role === 'user' ? 'bg-blue-100 ml-auto' : 'bg-white'
-            } max-w-[80%] ${msg.role === 'user' ? 'ml-auto' : 'mr-auto'} ${
-              msg.tentative ? 'opacity-70' : ''
-            }`}
-          >
-            <p className="text-sm text-gray-600">{msg.role === 'user' ? 'You' : 'AI'}</p>
-            <p className="mt-1">{msg.message}</p>
-            <p className="text-xs text-gray-500 mt-1">{msg.timeInCallSecs}s</p>
-          </motion.div>
-        ))}
-        <div ref={chatEndRef} />
+        </div>
       </div>
     </div>
   );
 }
+
+export default VoiceAssistant;

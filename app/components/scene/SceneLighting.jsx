@@ -11,7 +11,8 @@ export default function SceneLighting({
   pointIntensity = 10,
   spotIntensity = 30,
   showHelpers = false,
-  groupRef 
+  groupRef,
+  isMeetTiaSection = false
 }) {
   const directionalLightRef = useRef();
   const cameraLightRef = useRef();
@@ -87,8 +88,8 @@ export default function SceneLighting({
 
       // Update point light
       if (pointLightRef.current) {
-        const pointOffset = new THREE.Vector3(-5, 5, 0);
-        pointLightRef.current.position.copy(groupPosition.clone().add(pointOffset));
+        const pointPosition = isMeetTiaSection ? cameraPosition : groupPosition.clone().add(new THREE.Vector3(-5, 5, 0));
+        pointLightRef.current.position.copy(pointPosition);
       }
     }
   });
@@ -194,13 +195,16 @@ export default function SceneLighting({
       {/* Point light for local illumination */}
       <pointLight
         ref={pointLightRef}
-        position={[-5, 5, 0]}
+        position={isMeetTiaSection ? camera.position : [0, 10, 0]}
         intensity={pointIntensity}
+        color="#ffffff"
+        distance={50}
+        decay={1.5}
         castShadow
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
         shadow-camera-near={0.1}
-        shadow-camera-far={30}
+        shadow-camera-far={50}
         shadow-bias={-0.0001}
       />
 
@@ -240,5 +244,6 @@ SceneLighting.propTypes = {
   pointIntensity: PropTypes.number,
   spotIntensity: PropTypes.number,
   showHelpers: PropTypes.bool,
-  groupRef: PropTypes.object
+  groupRef: PropTypes.object,
+  isMeetTiaSection: PropTypes.bool
 };

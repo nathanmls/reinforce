@@ -21,10 +21,10 @@ export default function HeroSection({ language = 'pt' }) {
           <p className="mt-6 text-lg leading-8 text-[--text-color]">
             {t?.hero?.subtitle || translations.pt.hero.subtitle}
           </p>
-          <div className="mt-10 flex items-center justify-start gap-x-6">
+          <div className="mt-10 pointer-events-auto flex items-center justify-start gap-x-6">
             <button
               onClick={() => setIsWaitlistOpen(true)}
-              className="rounded-md bg-[--primary-color] px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[--primary-color-hover] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              className="rounded-md bg-[#F2B035] px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#F2B035] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
               {t?.hero?.waitlist || translations.pt.hero.waitlist}
             </button>

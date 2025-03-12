@@ -44,6 +44,27 @@ export const translations = {
       description: 'Our AI mentors are designed to provide personalized support for students at every level',
       cta: 'Meet the Mentors'
     },
+    meetTia: {
+      title: 'Meet Tia',
+      subtitle: 'Your Personalized AI Mentor',
+      description: 'Tia is your AI-powered mentor, designed to help you learn and grow in a personalized way.',
+      callToAction: 'Let\'s Begin!',
+      back: 'Go Back',
+      features: {
+        personalizedLearning: {
+          title: 'Personalized Learning',
+          description: 'Tia adapts to your learning style and pace.'
+        },
+        support: {
+          title: '24/7 Support',
+          description: 'Get help whenever you need it.'
+        },
+        flexibility: {
+          title: 'Total Flexibility',
+          description: 'Learn at your own pace and schedule.'
+        }
+      }
+    },
     contact: {
       title: 'Get in Touch',
       name: 'Name',
@@ -164,6 +185,27 @@ export const translations = {
       title: 'Conheça Seus Mentores IA',
       description: 'Nossos mentores de IA são projetados para fornecer suporte personalizado para estudantes em todos os níveis',
       cta: 'Conhecer os Mentores'
+    },
+    meetTia: {
+      title: 'Conheça Tia',
+      subtitle: 'Seu Mentor AI Personalizado',
+      description: 'Tia é sua mentora alimentada por IA, projetada para ajudá-lo a aprender e crescer de forma personalizada.',
+      callToAction: 'Vamos Começar!',
+      back: 'Voltar',
+      features: {
+        personalizedLearning: {
+          title: 'Aprendizado Personalizado',
+          description: 'Tia se adapta ao seu estilo e ritmo de aprendizado.'
+        },
+        support: {
+          title: 'Suporte 24/7',
+          description: 'Obtenha ajuda sempre que precisar.'
+        },
+        flexibility: {
+          title: 'Flexibilidade Total',
+          description: 'Aprenda no seu próprio ritmo e horário.'
+        }
+      }
     },
     contact: {
       title: 'Entre em Contato',
@@ -286,6 +328,27 @@ export const translations = {
       description: 'Nuestros mentores de IA están diseñados para brindar apoyo personalizado a estudiantes de todos los niveles',
       cta: 'Conoce a los Mentores'
     },
+    meetTia: {
+      title: 'Conoce a Tia',
+      subtitle: 'Tu Mentor de IA Personalizado',
+      description: 'Tia es tu mentora impulsada por IA, diseñada para ayudarte a aprender y crecer de manera personalizada.',
+      callToAction: '¡Comencemos!',
+      back: 'Regresar',
+      features: {
+        personalizedLearning: {
+          title: 'Aprendizaje Personalizado',
+          description: 'Tia se adapta a tu estilo y ritmo de aprendizaje.'
+        },
+        support: {
+          title: 'Soporte 24/7',
+          description: 'Obtén ayuda cuando la necesites.'
+        },
+        flexibility: {
+          title: 'Flexibilidad Total',
+          description: 'Aprende a tu propio ritmo y horario.'
+        }
+      }
+    },
     contact: {
       title: 'Contáctanos',
       name: 'Nombre',
@@ -406,6 +469,27 @@ export const translations = {
       title: 'Ontmoet Je AI-Mentoren',
       description: 'Onze AI-mentoren zijn ontworpen om persoonlijke ondersteuning te bieden aan studenten van elk niveau',
       cta: 'Ontmoet de Mentoren'
+    },
+    meetTia: {
+      title: 'Ontmoet Tia',
+      subtitle: 'Jouw Gepersonaliseerde AI Mentor',
+      description: 'Tia is jouw AI-aangedreven mentor, ontworpen om je te helpen leren en groeien op een gepersonaliseerde manier.',
+      callToAction: 'Laten we beginnen!',
+      back: 'Ga Terug',
+      features: {
+        personalizedLearning: {
+          title: 'Gepersonaliseerd Leren',
+          description: 'Tia past zich aan aan jouw leerstijl en tempo.'
+        },
+        support: {
+          title: '24/7 Ondersteuning',
+          description: 'Krijg hulp wanneer je het nodig hebt.'
+        },
+        flexibility: {
+          title: 'Totale Flexibiliteit',
+          description: 'Leer in je eigen tempo en schema.'
+        }
+      }
     },
     contact: {
       title: 'Neem Contact Op',

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { ROLE_PERMISSIONS } from '../config/roles';
+import { Logo } from './Logo';
 
 export const getMenuItems = (userRole) => {
   const permissions = ROLE_PERMISSIONS[userRole] || {};
@@ -128,6 +129,13 @@ export default function Sidebar() {
       }`}
     >
       <div className="flex flex-col h-full">
+        {/* Logo Section */}
+        <div className="p-4 border-b border-gray-200">
+          <Link href="/" className="flex items-center justify-center">
+            <Logo maxW={isOpen ? "150px" : "32px"} color="#5A1A8A" />
+          </Link>
+        </div>
+
         {/* Profile Section */}
         <div className="p-4 border-b border-gray-200">
           <Link href="/painel/account" className="flex items-center space-x-4">

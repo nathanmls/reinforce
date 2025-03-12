@@ -97,12 +97,12 @@ export default function LanguageSelector({ value, onChange, onHoverChange }) {
       
       {isOpen && (
         <div className="absolute right-0 mt-2 py-1 w-48 bg-white/95 backdrop-blur-sm 
-                      rounded-lg shadow-lg ring-1 ring-black/5 z-50 transform opacity-100 
+                      rounded-xl shadow-xl ring-1 ring-black/5 z-50 transform opacity-100 
                       scale-100 transition-all duration-200 ease-in-out">
           {Object.entries(languages).map(([code, { flag, name }]) => (
             <button
               key={code}
-              className={`w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center 
+              className={`w-full px-4 py-2 text-left hover:bg-gray-200 rounded-xl flex items-center 
                         space-x-3 transition-colors duration-150 ease-in-out
                         ${code === value ? 'bg-gray-50' : ''}`}
               onClick={() => {

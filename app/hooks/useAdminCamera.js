@@ -26,10 +26,12 @@ export default function useAdminCamera(camera, isExplorationMode, userRole) {
     };
     
     const handleKeyDown = (e) => {
+      if (!e || !e.key) return;
       keys.current[e.key.toLowerCase()] = true;
     };
 
     const handleKeyUp = (e) => {
+      if (!e || !e.key) return;
       keys.current[e.key.toLowerCase()] = false;
     };
 

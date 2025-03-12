@@ -7,8 +7,8 @@ export default function MentorSection({ language = 'en' }) {
   const t = translations[language] || translations.en;
 
   return (
-    <div id='mentor' className="relative isolate flex items-center h-screen px-6 pt-14 lg:px-8">
-      <div className="mx-auto flex flex-col w-full max-w-6xl items-end text-left py-32 sm:py-48 lg:py-56">
+    <div id='mentor' className="relative isolate pointer-events-none flex items-center h-screen px-6 pt-14 lg:px-8">
+      <div className="mx-auto pointer-events-none flex flex-col w-full max-w-6xl items-end text-left py-32 sm:py-48 lg:py-56">
         <div className="max-w-2xl">
           <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
             {t.mentor.title}
@@ -48,7 +48,7 @@ export default function MentorSection({ language = 'en' }) {
             </div>
           </dl>
         </div>
-        <div className="mt-10">
+        <div className="mt-10 pointer-events-auto">
           <Link
             href="/how-it-works"
             className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"

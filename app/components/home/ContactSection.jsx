@@ -49,14 +49,14 @@ export default function ContactSection() {
               </div>
             </div>
             <div className="sm:col-span-2">
-              <label htmlFor="email" className="block text-sm font-semibold leading-6 text-white">
+              <label htmlFor="contact-email" className="block text-sm font-semibold leading-6 text-white">
                 Email
               </label>
               <div className="mt-2.5">
                 <input
                   type="email"
                   name="email"
-                  id="email"
+                  id="contact-email"
                   value={formData.email}
                   onChange={handleChange}
                   className="block w-full rounded-md border-0 bg-white/5 px-3.5 py-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-[#C7DF88] sm:text-sm sm:leading-6"
