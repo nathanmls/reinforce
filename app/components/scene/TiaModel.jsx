@@ -15,7 +15,7 @@
 
 'use client';
 
-import { useRef } from 'react';
+import { useRef, forwardRef } from 'react';
 import { useLoader } from "@react-three/fiber";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import * as THREE from 'three';
@@ -36,13 +36,16 @@ import PropTypes from 'prop-types';
  * 
  * @returns {JSX.Element} A primitive object containing the loaded GLTF model
  */
-export default function TiaModel({ 
+const TiaModel = forwardRef(({ 
   position = [0, 0, 0], 
   rotation = [0, 0, 0], 
   scale = 3.5,
   wireframe = false
-}) {
-  const modelRef = useRef();
+}, ref) => {
+  const internalRef = useRef();
+  
+  // Use the forwarded ref if provided, otherwise use internal ref
+  const modelRef = ref || internalRef;
   
   // Load the model using GLTFLoader directly
   const gltf = useLoader(GLTFLoader, '/models/TiaChar.glb', (loader) => {
@@ -84,7 +87,10 @@ export default function TiaModel({
       scale={scale}
     />
   );
-}
+});
+
+// Add display name for better debugging
+TiaModel.displayName = 'TiaModel';
 
 TiaModel.propTypes = {
   position: PropTypes.arrayOf(PropTypes.number),
@@ -95,3 +101,5 @@ TiaModel.propTypes = {
   ]),
   wireframe: PropTypes.bool
 };
+
+export default TiaModel;

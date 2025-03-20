@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import PropTypes from 'prop-types';
 
 export default function BoyModel({ wireframe = false }) {
-  const { scene } = useGLTF('/models/BoyChar.glb');
+  const { scene } = useGLTF('/models/FriendChar.glb');
   const modelRef = useRef();
 
   useEffect(() => {
@@ -41,8 +41,6 @@ export default function BoyModel({ wireframe = false }) {
       ref={modelRef}
       object={scene}
       scale={3.5}
-      position={[-4, -7.7, 0]}
-      rotation={[0, Math.PI*0.5, 0]}
       castShadow
       receiveShadow
     />
@@ -53,4 +51,4 @@ BoyModel.propTypes = {
   wireframe: PropTypes.bool
 };
 
-useGLTF.preload('/models/BoyChar.glb');
+useGLTF.preload('/models/FriendChar.glb');

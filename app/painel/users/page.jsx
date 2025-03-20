@@ -7,8 +7,11 @@ import { db } from '../../firebase/config';
 import { USER_ROLES } from '../../config/roles';
 import EditUserModal from './components/EditUserModal';
 import AddUserModal from './components/AddUserModal';
+import ClientOnlyFirebase from '@/components/ClientOnlyFirebase';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
-export default function UsersPage() {
+// Separate the content component from the container
+function UsersContent() {
   const { user, isAdmin } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,6 +28,14 @@ export default function UsersPage() {
     try {
       setLoading(true);
       setError('');
+
+      // Check if db is initialized
+      if (!db) {
+        console.error('Firestore not initialized');
+        setError('Database connection not available');
+        setLoading(false);
+        return;
+      }
 
       // Create query based on user role
       let usersQuery;
@@ -199,14 +210,14 @@ export default function UsersPage() {
                     {user.lastActive}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button 
+                    <button
                       onClick={() => handleEditUser(user)}
-                      className="text-blue-600 hover:text-blue-900 mr-3"
+                      className="text-indigo-600 hover:text-indigo-900 mr-4"
                     >
                       Edit
                     </button>
                     {isAdmin && (
-                      <button 
+                      <button
                         onClick={() => handleDeleteUser(user.id)}
                         className="text-red-600 hover:text-red-900"
                       >
@@ -222,15 +233,11 @@ export default function UsersPage() {
       </div>
 
       {/* Edit User Modal */}
-      {showEditModal && editingUser && (
+      {showEditModal && (
         <EditUserModal
           user={editingUser}
-          onClose={() => {
-            setShowEditModal(false);
-            setEditingUser(null);
-          }}
+          onClose={() => setShowEditModal(false)}
           onSave={handleUpdateUser}
-          isAdmin={isAdmin}
         />
       )}
 
@@ -238,12 +245,18 @@ export default function UsersPage() {
       {showAddModal && (
         <AddUserModal
           onClose={() => setShowAddModal(false)}
-          onAdd={(userData) => {
-            setUsers([...users, userData]);
-            setShowAddModal(false);
-          }}
+          onSave={loadUsers}
         />
       )}
     </div>
+  );
+}
+
+// Main component that wraps the content with ClientOnlyFirebase
+export default function UsersPage() {
+  return (
+    <ClientOnlyFirebase fallback={<LoadingSpinner message="Loading users data..." />}>
+      <UsersContent />
+    </ClientOnlyFirebase>
   );
 }

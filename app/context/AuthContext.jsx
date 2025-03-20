@@ -10,7 +10,7 @@ import {
   setPersistence
 } from 'firebase/auth';
 import { auth, db } from '../firebase/config';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection } from 'firebase/firestore';
 import { USER_ROLES } from '../config/roles';
 
 const AuthContext = createContext({});
@@ -25,9 +25,26 @@ export function AuthProvider({ children }) {
   const [error, setError] = useState(null);
   const [initialized, setInitialized] = useState(false);
 
+  // Check if we're in a browser environment
+  const isBrowser = typeof window !== 'undefined';
+
   const updateUserProfile = async (uid) => {
     try {
-      const userDoc = await getDoc(doc(db, 'users', uid));
+      // Check if we're in a browser environment and if db is initialized
+      if (!isBrowser || !db) {
+        console.warn('Firestore not available or not in browser environment');
+        return;
+      }
+      
+      // Create a reference to the users collection
+      const usersCollection = collection(db, 'users');
+      if (!usersCollection) {
+        console.error('Failed to get users collection reference');
+        return;
+      }
+      
+      // Get the user document
+      const userDoc = await getDoc(doc(usersCollection, uid));
       const userData = userDoc.data();
       
       if (userData) {
@@ -45,14 +62,29 @@ export function AuthProvider({ children }) {
   };
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    // Don't run this effect on the server
+    if (!isBrowser) return;
+    
+    // Don't run this effect if Firebase auth is not available
+    if (!auth) {
+      console.warn('Firebase auth not initialized');
+      setLoading(false);
+      return;
+    }
     
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
         if (user) {
           console.log('Auth state changed - User found:', user.uid);
           setUser(user);
-          await updateUserProfile(user.uid);
+          
+          // Only try to update the user profile if Firestore is available
+          if (db) {
+            await updateUserProfile(user.uid);
+          } else {
+            console.warn('Firestore not initialized, skipping profile update');
+          }
+          
           setError(null);
         } else {
           console.log('Auth state changed - No user');
@@ -75,6 +107,11 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     try {
+      // Check if we're in a browser environment and if auth is initialized
+      if (!isBrowser || !auth) {
+        throw new Error('Firebase auth not available');
+      }
+      
       setError(null);
       setLoading(true);
       
@@ -92,6 +129,11 @@ export function AuthProvider({ children }) {
 
   const signup = async (email, password) => {
     try {
+      // Check if we're in a browser environment and if auth is initialized
+      if (!isBrowser || !auth) {
+        throw new Error('Firebase auth not available');
+      }
+      
       setError(null);
       setLoading(true);
       
@@ -101,12 +143,16 @@ export function AuthProvider({ children }) {
       const result = await createUserWithEmailAndPassword(auth, email, password);
       
       // Create user document in Firestore
-      await setDoc(doc(db, 'users', result.user.uid), {
-        email: result.user.email,
-        role: USER_ROLES.STUDENT,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      });
+      if (db) {
+        await setDoc(doc(db, 'users', result.user.uid), {
+          email: result.user.email,
+          role: USER_ROLES.STUDENT,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+      } else {
+        console.warn('Firestore not initialized, skipping user document creation');
+      }
       
       setUserRole(USER_ROLES.STUDENT);
       await updateUserProfile(result.user.uid);

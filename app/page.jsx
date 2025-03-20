@@ -32,29 +32,112 @@ export default function HomePage() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingDetail, setLoadingDetail] = useState('Initializing...');
   const [language, setLanguage] = useState('en'); 
   const t = translations[language];
   const { user, logout } = useAuth();
   const router = useRouter();
   const mainSceneRef = useRef(null);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
+  const [showMainScene, setShowMainScene] = useState(false);
 
   const sections = ['about', 'mentor', 'contact', 'testimonials', 'updates'];
 
-  // Handle initial loading
+  // Handle initial loading - just a quick app initialization phase
   useEffect(() => {
     const loadApp = async () => {
-      const steps = [20, 40, 60, 80, 100];
-      for (const progress of steps) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+      // App initialization phase (0-30%) with incremental progress
+      const initialSteps = [5, 10, 15, 20, 25, 30];
+      setLoadingDetail('Initializing application...');
+      
+      // Show incremental progress during initialization
+      for (const progress of initialSteps) {
         setLoadingProgress(progress);
+        await new Promise(resolve => setTimeout(resolve, 150));
       }
-      // Keep loading true for a moment to allow the fade out animation
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setLoading(false);
+      
+      // Mark initial load as complete and start loading 3D assets
+      setInitialLoadComplete(true);
+      setLoadingDetail('Loading 3D assets...');
+      
+      // Safety timeout in case assets don't load
+      const safetyTimeout = setTimeout(() => {
+        if (loadingProgress < 100) {
+          console.log('[HomePage] Safety timeout reached - forcing load completion');
+          setLoadingProgress(100);
+          setLoadingDetail('Load complete');
+          // Give a moment for the final 100% event to be processed
+          setTimeout(() => {
+            setLoading(false);
+            setShowMainScene(true);
+          }, 1500);
+        }
+      }, 15000); // 15 seconds max loading time
+      
+      return () => clearTimeout(safetyTimeout);
     };
 
     loadApp();
   }, []);
+  
+  // Listen for 3D scene loading progress
+  useEffect(() => {
+    if (!initialLoadComplete) return;
+    
+    // Use a ref to track if we've already completed loading
+    const loadingCompletedRef = { current: false };
+    
+    const handleSceneLoadingProgress = (event) => {
+      // Skip processing if loading is already completed
+      if (loadingCompletedRef.current) return;
+      
+      if (event.detail && typeof event.detail.progress === 'number') {
+        // Scale the actual progress from 0-100 to 30-100 (since initialization is 0-30%)
+        const scaledProgress = 30 + (event.detail.progress * 0.7);
+        const progress = Math.min(Math.round(scaledProgress), 100);
+        setLoadingProgress(progress);
+        
+        // Display detailed loading information if available
+        if (event.detail.detail) {
+          setLoadingDetail(event.detail.detail);
+        } else if (event.detail.url) {
+          const assetName = event.detail.url.split('/').pop();
+          setLoadingDetail(`Loading: ${assetName}`);
+        }
+        
+        // Log only if progress changes significantly (reduce console spam)
+        if (progress % 10 === 0) {
+          console.log(`[HomePage] 3D Scene loading progress: ${progress}%`);
+        }
+        
+        // When 3D scene is fully loaded or we receive a complete flag, complete the loading process
+        if ((progress >= 100 || event.detail.complete) && !assetsLoaded) {
+          // Mark loading as completed to prevent duplicate processing
+          loadingCompletedRef.current = true;
+          
+          setAssetsLoaded(true);
+          setLoadingDetail('All assets loaded successfully');
+          console.log('[HomePage] 3D assets fully loaded');
+          
+          // Ensure we reach 100% on the loading bar
+          setLoadingProgress(100);
+          
+          // Wait a moment to show the 100% state before removing the loader
+          setTimeout(() => {
+            setLoading(false);
+            setShowMainScene(true);
+          }, 1000);
+        }
+      }
+    };
+    
+    window.addEventListener('sceneLoadingProgress', handleSceneLoadingProgress);
+    
+    return () => {
+      window.removeEventListener('sceneLoadingProgress', handleSceneLoadingProgress);
+    };
+  }, [initialLoadComplete, assetsLoaded]);
 
   // Handle language detection
   useEffect(() => {
@@ -97,14 +180,30 @@ export default function HomePage() {
   }, [mainSceneRef.current]);
 
   if (loading) {
-    return <PreLoader loadingProgress={loadingProgress} />;
+    return (
+      <>
+        <PreLoader 
+          loadingProgress={loadingProgress} 
+          loadingDetail={loadingDetail}
+        />
+        {/* Preload the 3D scene in the background while showing the loader */}
+        <div style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', visibility: 'hidden' }}>
+          <MainScene3D ref={mainSceneRef} />
+        </div>
+      </>
+    );
   }
 
   return (
     <CameraDebugProvider>
       <div className="relative min-h-screen">
-        <MainScene3D ref={mainSceneRef} />  
-        <div className="relative pointer-events-none z-10">
+        {/* Canvas in the middle layer */}
+        <div className="fixed inset-0 z-10">
+          {showMainScene && <MainScene3D ref={mainSceneRef} />}
+        </div>
+        
+        {/* Main content above the canvas with higher z-index */}
+        <div className="relative pointer-events-none z-20 pb-[400px]">
           <FloatingNav sections={sections} translations={t.nav} />
           <Header 
             language={language}
@@ -123,10 +222,12 @@ export default function HomePage() {
             <TestimonialsSection />
             <CTASection />
             <ContactSection />
-            <Footer />
           </main>
         </div>
-
+        
+        {/* Footer below the canvas with lower z-index */}
+        <Footer />
+        
       {/* Login Modal */}
       <LoginModal
         isOpen={isLoginModalOpen}

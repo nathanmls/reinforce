@@ -6,18 +6,9 @@ import { useAuth } from '../../context/AuthContext';
 
 export default function CameraDebug() {
   const { userRole } = useAuth();
-  const { cameraState, isDebugVisible, setIsDebugVisible } = useDebugCamera();
+  const { cameraState, isDebugVisible } = useDebugCamera();
 
-  useEffect(() => {
-    const handleKeyPress = (e) => {
-      if (e.key.toLowerCase() === 'c' && userRole === 'administrator') {
-        setIsDebugVisible(prev => !prev);
-      }
-    };
-
-    window.addEventListener('keypress', handleKeyPress);
-    return () => window.removeEventListener('keypress', handleKeyPress);
-  }, [setIsDebugVisible, userRole]);
+  // Removed the keypress event handler that was toggling the debug display
 
   if (!isDebugVisible || userRole !== 'administrator') return null;
 

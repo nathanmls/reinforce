@@ -8,10 +8,10 @@ import useAdminCamera from "../../hooks/useAdminCamera";
 
 // Simplified transition states
 export const TRANSITION_STATES = {
-  IDLE: 'idle',
-  TRANSITIONING: 'transitioning',
-  COMPLETED: 'completed',
-  FAILED: 'failed'
+  IDLE: "idle",
+  TRANSITIONING: "transitioning",
+  COMPLETED: "completed",
+  FAILED: "failed",
 };
 
 // Camera state positions and rotations
@@ -29,22 +29,22 @@ export const CAMERA_STATES = {
     rotation: { x: 0, y: Math.PI * -0.28, z: 0 },
   },
   meetTia: {
-    position: { x: 0, y: -7, z: 2 },
-    rotation: { x: 0, y: 0, z: 0 },
+    position: { x: -1.3, y: -7, z: 3 },
+    rotation: { x: 0, y: Math.PI * -0.15, z: 0 },
   },
   // Initial position for MeetTia section
   meetTiaInitial: {
-    position: { x: 0, y: -7, z: 2 },
-    rotation: { x: 0, y: 0, z: 0 },
+    position: { x: -1.3, y: -7, z: 3 },
+    rotation: { x: 0, y: Math.PI * -0.28, z: 0 },
   },
   // Closeup position for MeetTia section (when Let's Begin is clicked)
   meetTiaClose: {
-    position: { x: 0, y: -7, z: 2 }, // Moved closer to the portal (negative z value)
-    rotation: { x: 0, y: 0, z: 0 },
+    position: { x: 0, y: -7, z: 3 }, // Moved closer to the portal (negative z value)
+    rotation: { x: 0, y: Math.PI * -0.28, z: 0 },
   },
   meetTiaFinal: {
-    position: { x: 0, y: -10, z: 3 },
-    rotation: { x: 0, y: 0, z: 0 },
+    position: { x: -1.3, y: -10, z: 3 },
+    rotation: { x: 0, y: Math.PI * -0.15, z: 0 },
   },
 };
 
@@ -64,11 +64,19 @@ const CameraController = ({
   const [isWallTransitioned, setIsWallTransitioned] = useState(false);
   const [targetCameraPosition, setTargetCameraPosition] = useState(null);
   const [targetQuaternion, setTargetQuaternion] = useState(null);
-  const [transitionState, setTransitionState] = useState(TRANSITION_STATES.IDLE);
+  const [transitionState, setTransitionState] = useState(
+    TRANSITION_STATES.IDLE
+  );
   const [transitionError, setTransitionError] = useState(null);
   const [isMeetTiaCloseup, setIsMeetTiaCloseup] = useState(false);
 
-  const { heroProgress, welcomeProgress, mentorProgress, meetTiaProgress, comingSoonProgress } = scrollProgress;
+  const {
+    heroProgress,
+    welcomeProgress,
+    mentorProgress,
+    meetTiaProgress,
+    comingSoonProgress,
+  } = scrollProgress;
 
   // Optimized exploration mode handler
   const toggleExplorationMode = (e) => {
@@ -151,7 +159,7 @@ const CameraController = ({
   // Monitor transition state changes
   useEffect(() => {
     if (transitionState === TRANSITION_STATES.FAILED) {
-      console.error('Transition failed:', transitionError);
+      console.error("Transition failed:", transitionError);
     }
   }, [transitionState, transitionError]);
 
@@ -350,9 +358,11 @@ const CameraController = ({
     }
 
     // Update camera position and rotation when transitioning
-    if (targetCameraPosition && 
-        (transitionState === TRANSITION_STATES.TRANSITIONING)) {
-      console.log('Transitioning camera to:', targetCameraPosition);
+    if (
+      targetCameraPosition &&
+      transitionState === TRANSITION_STATES.TRANSITIONING
+    ) {
+      console.log("Transitioning camera to:", targetCameraPosition);
       const currentPos = new THREE.Vector3(
         cameraRef.current.position.x,
         cameraRef.current.position.y,
@@ -379,9 +389,9 @@ const CameraController = ({
 
       // Check if we've reached the target (with a small threshold)
       const distanceToTarget = currentPos.distanceTo(targetPos);
-      console.log('Distance to target:', distanceToTarget);
+      console.log("Distance to target:", distanceToTarget);
       if (distanceToTarget < 0.1) {
-        console.log('Transition completed');
+        console.log("Transition completed");
         setTransitionState(TRANSITION_STATES.COMPLETED);
       }
     }
@@ -420,11 +430,11 @@ const CameraController = ({
   const transitionWallMeetTia = () => {
     try {
       if (!cameraRef.current) {
-        throw new Error('Camera reference is not available');
+        throw new Error("Camera reference is not available");
       }
 
       if (transitionState === TRANSITION_STATES.TRANSITIONING) {
-        throw new Error('Transition already in progress');
+        throw new Error("Transition already in progress");
       }
 
       setTransitionState(TRANSITION_STATES.TRANSITIONING);
@@ -453,7 +463,7 @@ const CameraController = ({
 
       // Validate target position
       if (Object.values(targetPosition).some(isNaN)) {
-        throw new Error('Invalid target position calculated');
+        throw new Error("Invalid target position calculated");
       }
 
       setTargetCameraPosition(targetPosition);
@@ -464,14 +474,14 @@ const CameraController = ({
       );
 
       if (!targetQuat.isValid()) {
-        throw new Error('Invalid target rotation calculated');
+        throw new Error("Invalid target rotation calculated");
       }
 
       setTargetQuaternion(targetQuat);
       setIsWallTransitioned(true);
       // Note: COMPLETED state will be set when animation actually reaches target
     } catch (error) {
-      console.error('Transition failed:', error);
+      console.error("Transition failed:", error);
       setTransitionError(error.message);
       setTransitionState(TRANSITION_STATES.FAILED);
       // Reset any partial transition state
@@ -493,11 +503,11 @@ const CameraController = ({
   const reverseWallMeetTiaTransition = () => {
     try {
       if (!initialCameraState.current) {
-        throw new Error('No initial camera state available');
+        throw new Error("No initial camera state available");
       }
 
       if (transitionState === TRANSITION_STATES.TRANSITIONING) {
-        throw new Error('Transition already in progress');
+        throw new Error("Transition already in progress");
       }
 
       setTransitionState(TRANSITION_STATES.TRANSITIONING);
@@ -505,7 +515,7 @@ const CameraController = ({
 
       // Validate initial state
       if (Object.values(initialCameraState.current.position).some(isNaN)) {
-        throw new Error('Invalid initial position state');
+        throw new Error("Invalid initial position state");
       }
 
       setTargetCameraPosition(initialCameraState.current.position);
@@ -519,14 +529,14 @@ const CameraController = ({
       );
 
       if (!targetQuat.isValid()) {
-        throw new Error('Invalid initial rotation state');
+        throw new Error("Invalid initial rotation state");
       }
 
       setTargetQuaternion(targetQuat);
       setIsWallTransitioned(false);
       setTransitionState(TRANSITION_STATES.IDLE);
     } catch (error) {
-      console.error('Reverse transition failed:', error);
+      console.error("Reverse transition failed:", error);
       setTransitionError(error.message);
       setTransitionState(TRANSITION_STATES.FAILED);
     }
@@ -534,48 +544,40 @@ const CameraController = ({
 
   const getTransitionState = () => ({
     state: transitionState,
-    error: transitionError
+    error: transitionError,
   });
 
   // Function to transition camera to close-up position when clicking Let's Begin
   const transitionToMeetTiaCloseup = () => {
     try {
       if (!cameraRef.current) {
-        throw new Error('Camera reference is not available');
+        throw new Error("Camera reference is not available");
       }
 
-      console.log('Starting transition to MeetTia closeup');
-      
+      console.log("Starting transition to MeetTia closeup");
+
       // Force reset any ongoing transitions
       setTransitionState(TRANSITION_STATES.IDLE);
       setTransitionError(null);
-      
+
       // Set the new transition state
       setTransitionState(TRANSITION_STATES.TRANSITIONING);
 
-      // Directly set camera position for immediate effect
-      cameraRef.current.position.set(
-        CAMERA_STATES.meetTiaClose.position.x,
-        CAMERA_STATES.meetTiaClose.position.y,
-        CAMERA_STATES.meetTiaClose.position.z
+      const targetPosition = CAMERA_STATES.meetTiaClose.position;
+      const targetRotation = CAMERA_STATES.meetTiaClose.rotation;
+
+      setTargetCameraPosition(targetPosition);
+
+      const targetQuat = new THREE.Quaternion().setFromEuler(
+        new THREE.Euler(targetRotation.x, targetRotation.y, targetRotation.z)
       );
-      
-      cameraRef.current.rotation.set(
-        CAMERA_STATES.meetTiaClose.rotation.x,
-        CAMERA_STATES.meetTiaClose.rotation.y,
-        CAMERA_STATES.meetTiaClose.rotation.z
-      );
-      
+      setTargetQuaternion(targetQuat);
+
       // Update states
       setIsMeetTiaCloseup(true);
       if (updatePortalCloseupState) updatePortalCloseupState(true);
-      
-      // Complete the transition immediately
-      setTransitionState(TRANSITION_STATES.COMPLETED);
-      
-      console.log('Transition to MeetTia closeup completed');
     } catch (error) {
-      console.error('Transition to closeup failed:', error);
+      console.error("Transition to closeup failed:", error);
       setTransitionError(error.message);
       setTransitionState(TRANSITION_STATES.FAILED);
     }
@@ -585,15 +587,15 @@ const CameraController = ({
   const transitionToMeetTiaInitial = () => {
     try {
       if (!cameraRef.current) {
-        throw new Error('Camera reference is not available');
+        throw new Error("Camera reference is not available");
       }
 
-      console.log('Starting transition to MeetTia initial position');
-      
+      console.log("Starting transition to MeetTia initial position");
+
       // Force reset any ongoing transitions
       setTransitionState(TRANSITION_STATES.IDLE);
       setTransitionError(null);
-      
+
       // Set the new transition state
       setTransitionState(TRANSITION_STATES.TRANSITIONING);
 
@@ -603,23 +605,23 @@ const CameraController = ({
         CAMERA_STATES.meetTiaInitial.position.y,
         CAMERA_STATES.meetTiaInitial.position.z
       );
-      
+
       cameraRef.current.rotation.set(
         CAMERA_STATES.meetTiaInitial.rotation.x,
         CAMERA_STATES.meetTiaInitial.rotation.y,
         CAMERA_STATES.meetTiaInitial.rotation.z
       );
-      
+
       // Update states
       setIsMeetTiaCloseup(false);
       if (updatePortalCloseupState) updatePortalCloseupState(false);
-      
+
       // Complete the transition immediately
       setTransitionState(TRANSITION_STATES.COMPLETED);
-      
-      console.log('Transition to MeetTia initial position completed');
+
+      console.log("Transition to MeetTia initial position completed");
     } catch (error) {
-      console.error('Transition to initial position failed:', error);
+      console.error("Transition to initial position failed:", error);
       setTransitionError(error.message);
       setTransitionState(TRANSITION_STATES.FAILED);
     }
@@ -636,9 +638,15 @@ const CameraController = ({
       transitionError,
       transitionToMeetTiaCloseup,
       transitionToMeetTiaInitial,
-      isMeetTiaCloseup
+      isMeetTiaCloseup,
     });
-  }, [isExplorationMode, transitionState, transitionError, isMeetTiaCloseup, onCameraStateChange]);
+  }, [
+    isExplorationMode,
+    transitionState,
+    transitionError,
+    isMeetTiaCloseup,
+    onCameraStateChange,
+  ]);
 
   return null; // This is a logic component, no rendering
 };

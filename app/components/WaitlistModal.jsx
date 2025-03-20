@@ -3,7 +3,7 @@
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import Image from 'next/image';
-import ImageWaitlist from '../images/julie-c.png';
+import ImageWaitlist from '../../public/images/waitlist.png';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { translations } from '../translations';
 

@@ -1,6 +1,14 @@
 'use client';
+import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import Logo from './Logo';
 
 const navigation = {
+  main: [
+    { name: 'Home', href: '/' },
+    { name: 'About', href: '/about' },
+    { name: 'Contact', href: '/contact' },
+  ],
   social: [
     {
       name: 'Instagram',
@@ -32,20 +40,175 @@ const navigation = {
 };
 
 export default function Footer() {
+  const videoRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const footerRef = useRef(null);
+  const observerRef = useRef(null);
+  const triggerRef = useRef(null);
+
+  // Function to create and set up the trigger element
+  const setupTrigger = () => {
+    // Only run on client-side
+    if (typeof window === 'undefined') return;
+    
+    // Find the contact section or create a trigger at the bottom
+    const contactSection = document.getElementById('contact');
+    
+    if (contactSection) {
+      // Use the contact section as our trigger point
+      triggerRef.current = contactSection;
+    } else {
+      // Create a trigger element at the bottom of the page
+      if (!triggerRef.current) {
+        const trigger = document.createElement('div');
+        trigger.id = 'footer-trigger';
+        trigger.style.position = 'absolute';
+        trigger.style.bottom = '0';
+        trigger.style.width = '100%';
+        trigger.style.height = '1px';
+        trigger.style.visibility = 'hidden';
+        document.body.appendChild(trigger);
+        triggerRef.current = trigger;
+      }
+    }
+    
+    // Set up the intersection observer
+    observerRef.current = new IntersectionObserver((entries) => {
+      const [entry] = entries;
+      setIsVisible(entry.isIntersecting);
+    }, { 
+      threshold: 0.1,
+      rootMargin: '0px 0px 0px 0px' // Only trigger when the element is actually visible
+    });
+    
+    // Start observing the trigger element
+    if (triggerRef.current) {
+      observerRef.current.observe(triggerRef.current);
+    }
+  };
+
+  useEffect(() => {
+    // Ensure video plays automatically with proper attributes
+    if (videoRef.current) {
+      // Set required attributes for autoplay to work in most browsers
+      videoRef.current.muted = true;
+      videoRef.current.playsInline = true;
+      
+      // Try to play the video with error handling
+      videoRef.current.play().catch(error => {
+        console.error("Video autoplay failed:", error);
+        // Don't treat this as a critical error - video will play when user interacts
+      });
+    }
+    
+    // Set up the trigger with a slight delay to ensure DOM is ready
+    const timeoutId = setTimeout(() => {
+      setupTrigger();
+    }, 500);
+    
+    return () => {
+      // Clean up
+      clearTimeout(timeoutId);
+      
+      if (observerRef.current && triggerRef.current) {
+        observerRef.current.unobserve(triggerRef.current);
+        
+        // Only remove if we created it
+        if (triggerRef.current.id === 'footer-trigger') {
+          document.body.removeChild(triggerRef.current);
+        }
+      }
+    };
+  }, []);
+
   return (
-    <footer className="bg-gray-900">
-      <div className="mx-auto max-w-7xl overflow-hidden px-6 py-20 sm:py-24 lg:px-8">
-        <div className="mt-10 flex justify-center space-x-10">
+    <footer 
+      ref={footerRef}
+      className={`bg-[#1A1A1A] text-white fixed bottom-0 w-full min-h-[400px] z-10 transition-transform duration-500 ${
+        isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+      }`}
+    >
+      {/* Video Background */}
+      <div className="absolute z-0 w-full h-[900px] -mt-20 left-0">
+        <video 
+          ref={videoRef}
+          autoPlay 
+          playsInline 
+          loop 
+          muted
+          className="w-full h-full object-cover"
+        >
+          <source src="/videos/bg-waves.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute bg-black/70 inset-0"></div>
+      </div>
+      
+      {/* Content */}
+      <div className="flex flex-col items-start relative z-0 max-w-7xl mx-auto px-6 py-20 sm:py-24 lg:px-8">
+        {/* Logo Section */}
+        <div className="pb-10 md:pb-4">
+          <Logo maxW={150} color="#FFFFFF" />
+        </div>
+        
+        {/* Divider */}
+        <div className="block md:hidden bg-white/20 h-[1px] w-full"></div>
+        
+        {/* Navigation and Social Links */}
+        <div className="flex justify-between w-full items-center">
+          {/* Main Navigation */}
+          <div className="flex flex-col md:flex-row py-10 md:py-6 gap-6 opacity-80">
+            {navigation.main.map((item) => (
+              <Link 
+                key={item.name} 
+                href={item.href}
+                className="text-white hover:text-[#C7DF88]"
+              >
+                {item.name}
+              </Link>
+            ))}
+            <a href="mailto:info@reinforce.com" className="text-white hover:text-[#C7DF88]">
+              Contact us
+            </a>
+          </div>
+          
+          {/* Social Links - Desktop */}
+          <div className="hidden md:flex gap-8">
+            {navigation.social.map((item) => (
+              <a key={item.name} href={item.href} className="text-white hover:text-[#C7DF88]">
+                <span className="sr-only">{item.name}</span>
+                <item.icon className="h-7 w-7" aria-hidden="true" />
+              </a>
+            ))}
+          </div>
+        </div>
+        
+        {/* Divider */}
+        <div className="bg-white/20 h-[1px] w-full"></div>
+        
+        {/* Social Links - Mobile */}
+        <div className="flex md:hidden gap-8 mt-10">
           {navigation.social.map((item) => (
-            <a key={item.name} href={item.href} className="text-gray-400 hover:text-[#C7DF88]">
+            <a key={item.name} href={item.href} className="text-white hover:text-[#C7DF88]">
               <span className="sr-only">{item.name}</span>
-              <item.icon className="h-6 w-6" aria-hidden="true" />
+              <item.icon className="h-10 w-10" aria-hidden="true" />
             </a>
           ))}
         </div>
-        <p className="mt-10 text-center text-xs leading-5 text-gray-400">
-          &copy; {new Date().getFullYear()} Reinforce. Todos os direitos reservados.
-        </p>
+        
+        {/* Copyright and Legal */}
+        <div className="mt-10 md:mt-8 opacity-50 md:opacity-90 flex flex-col-reverse sm:flex-row justify-between w-full gap-6">
+          <p className="text-xs">
+            &copy; {new Date().getFullYear()} Reinforce. Todos os direitos reservados.
+          </p>
+          <div className="text-xs flex gap-6">
+            <Link href="/privacy" className="text-white hover:text-[#C7DF88]">
+              Privacy
+            </Link>
+            <Link href="/terms" className="text-white hover:text-[#C7DF88]">
+              Terms
+            </Link>
+          </div>
+        </div>
       </div>
     </footer>
   );

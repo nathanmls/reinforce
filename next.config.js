@@ -2,7 +2,13 @@
 const nextConfig = {
   // Enable static image imports
   images: {
-    domains: ['firebasestorage.googleapis.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'firebasestorage.googleapis.com',
+        pathname: '**',
+      },
+    ],
   },
   // Webpack configuration for Three.js
   webpack: (config, { dev, isServer }) => {

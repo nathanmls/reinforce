@@ -4,8 +4,11 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
+import ClientOnlyFirebase from '@/components/ClientOnlyFirebase';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
-export default function Dashboard() {
+// Separate the content component from the container
+function DashboardContent() {
   const { user } = useAuth();
   const [userName, setUserName] = useState('');
 
@@ -14,13 +17,20 @@ export default function Dashboard() {
       if (!user) return;
       
       try {
+        // Check if db is initialized
+        if (!db) {
+          console.error('Firestore not initialized');
+          setUserName(user.email || 'User');
+          return;
+        }
+        
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists()) {
           setUserName(userDoc.data().name || user.email);
         }
       } catch (err) {
         console.error('Error loading user name:', err);
-        setUserName(user.email);
+        setUserName(user.email || 'User');
       }
     };
 
@@ -116,5 +126,14 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Main component that wraps the content with ClientOnlyFirebase
+export default function Dashboard() {
+  return (
+    <ClientOnlyFirebase fallback={<LoadingSpinner message="Loading dashboard..." />}>
+      <DashboardContent />
+    </ClientOnlyFirebase>
   );
 }

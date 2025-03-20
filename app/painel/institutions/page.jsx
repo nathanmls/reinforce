@@ -5,8 +5,11 @@ import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { USER_ROLES } from '../../config/roles';
 import MentorAssignmentModal from '../../components/modals/MentorAssignmentModal';
+import ClientOnlyFirebase from '@/components/ClientOnlyFirebase';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
-const InstitutionsPage = () => {
+// Separate the content component from the container
+const InstitutionsContent = () => {
   const { user, userRole } = useAuth();
   const router = useRouter();
   const [tabValue, setTabValue] = useState('all');
@@ -197,6 +200,15 @@ const InstitutionsPage = () => {
         }}
       />
     </div>
+  );
+};
+
+// Main component that wraps the content with ClientOnlyFirebase
+const InstitutionsPage = () => {
+  return (
+    <ClientOnlyFirebase fallback={<LoadingSpinner message="Loading institutions data..." />}>
+      <InstitutionsContent />
+    </ClientOnlyFirebase>
   );
 };
 

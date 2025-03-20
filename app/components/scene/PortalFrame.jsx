@@ -16,40 +16,9 @@ export default function PortalFrame({
   children,
   position = [0, 0, 0],
   rotation = [0, 0, 0],
-  // title = "Meet Tia",
-  // subtitle = "Your AI Mentor"
 }) {
   return (
     <group position={position} rotation={rotation}>
-      {/* Title text */}
-      {/* <Text
-        color="black"
-        fontSize={0.3}
-        maxWidth={2}
-        lineHeight={1}
-        letterSpacing={0.02}
-        textAlign="left"
-        anchorY="top"
-        anchorX="left"
-        position={[-1.5, height/2 + 0.25, 0.01]}
-      >
-        {title}
-      </Text> */}
-
-      {/* Subtitle text */}
-      {/* <Text
-        color="black"
-        fontSize={0.15}
-        maxWidth={2}
-        lineHeight={1}
-        letterSpacing={0.02}
-        textAlign="left"
-        anchorX="left"
-        position={[-1.5, height/2, 0.01]}
-      >
-        {subtitle}
-      </Text> */}
-
       {/* Main portal frame */}
       <mesh>
         <planeGeometry args={[width, height]} />

@@ -5,8 +5,11 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/firebase/config';
 import { useAuth } from '@/context/AuthContext';
 import { USER_ROLES, ROLE_PERMISSIONS } from '@/config/roles';
+import ClientOnlyFirebase from '@/components/ClientOnlyFirebase';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
-export default function StudentsPage() {
+// Separate the content component from the container
+function StudentsContent() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const { userRole } = useAuth();
@@ -16,6 +19,13 @@ export default function StudentsPage() {
   useEffect(() => {
     const fetchStudents = async () => {
       try {
+        // Check if db is initialized
+        if (!db) {
+          console.error('Firestore not initialized');
+          setLoading(false);
+          return;
+        }
+
         const studentsQuery = query(
           collection(db, 'users'),
           where('role', '==', USER_ROLES.STUDENT)
@@ -201,41 +211,33 @@ export default function StudentsPage() {
                         <div className="flex-shrink-0 h-10 w-10">
                           <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
                             <span className="text-gray-500 font-medium">
-                              {student.name?.[0]?.toUpperCase() || student.email[0].toUpperCase()}
+                              {student.name ? student.name.charAt(0).toUpperCase() : 'U'}
                             </span>
                           </div>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {student.name || 'N/A'}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {student.email}
-                          </div>
+                          <div className="text-sm font-medium text-gray-900">{student.name || 'Unnamed User'}</div>
+                          <div className="text-sm text-gray-500">{student.email}</div>
                         </div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {student.metrics.totalSessions}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {student.metrics.averageSessionDuration}m
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {student.metrics.completedExercises}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="w-full bg-gray-200 rounded-full h-2.5">
-                          <div 
-                            className="bg-blue-600 h-2.5 rounded-full" 
-                            style={{ width: `${student.metrics.progressRate}%` }}
-                          ></div>
-                        </div>
-                        <span className="ml-2 text-sm text-gray-500">
-                          {student.metrics.progressRate}%
-                        </span>
+                      <div className="text-sm text-gray-900">{student.metrics.totalSessions}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{student.metrics.averageSessionDuration}m</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{student.metrics.completedExercises}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div 
+                          className="bg-blue-600 h-2.5 rounded-full" 
+                          style={{ width: `${student.metrics.progressRate}%` }}
+                        ></div>
                       </div>
+                      <div className="text-xs text-gray-500 mt-1">{student.metrics.progressRate}%</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(student.metrics.lastActive).toLocaleDateString()}
@@ -248,5 +250,14 @@ export default function StudentsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Main component that wraps the content with ClientOnlyFirebase
+export default function StudentsPage() {
+  return (
+    <ClientOnlyFirebase fallback={<LoadingSpinner message="Loading students data..." />}>
+      <StudentsContent />
+    </ClientOnlyFirebase>
   );
 }

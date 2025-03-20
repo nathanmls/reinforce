@@ -4,57 +4,75 @@ import { useState, useEffect, useRef } from 'react';
 
 const testimonials = [
   {
-    body: 'A plataforma me ajudou a desenvolver habilidades que eu nem sabia que tinha. A inteligência artificial realmente entende minhas necessidades.',
+    body: 'Como professora do 3º ano, vejo uma transformação incrível nos meus alunos. A plataforma adapta-se ao ritmo de cada criança, tornando o aprendizado mais eficaz e divertido.',
     author: {
-      name: 'Ana Silva',
-      handle: 'Estudante de Graduação',
+      name: 'Profa. Maria Oliveira',
+      handle: 'Professora do 3º ano',
       imageUrl:
         'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
     },
   },
   {
-    body: 'Incrível como a IA consegue adaptar o conteúdo ao meu ritmo de aprendizado. Me sinto mais confiante a cada dia.',
+    body: 'Meu filho de 8 anos tinha dificuldades em matemática. Depois de usar o Reinforce, ele não só melhorou suas notas, mas agora adora resolver problemas matemáticos!',
     author: {
-      name: 'Bruna Santos',
-      handle: 'Profissional em Transição',
-      imageUrl:
-        'https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    },
-  },
-  {
-    body: 'A mentoria personalizada me ajudou a encontrar o caminho certo para o meu sucesso acadêmico.',
-    author: {
-      name: 'Márcio Oliveira',
-      handle: 'Aluno do Ensino Superior',
-      imageUrl:
-        'https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    },
-  },
-  {
-    body: 'Como professora, vejo um grande potencial na forma como a IA personaliza o aprendizado para cada aluno.',
-    author: {
-      name: 'Patricia Lima',
-      handle: 'Professora',
-      imageUrl:
-        'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    },
-  },
-  {
-    body: 'O suporte 24/7 e a flexibilidade do programa fizeram toda a diferença na minha jornada de aprendizado.',
-    author: {
-      name: 'Roberto Martins',
-      handle: 'Estudante Trabalhador',
+      name: 'Carlos Mendes',
+      handle: 'Pai de aluno do 2º ano',
       imageUrl:
         'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
     },
   },
   {
-    body: 'Minha filha está muito mais engajada com os estudos desde que começou a usar a plataforma.',
+    body: 'Como coordenadora pedagógica, observei que as turmas que usam o Reinforce demonstram maior engajamento e melhores resultados nas avaliações nacionais.',
     author: {
-      name: 'Carla Mendes',
-      handle: 'Mãe de Aluna',
+      name: 'Dra. Lúcia Santos',
+      handle: 'Coordenadora Pedagógica',
+      imageUrl:
+        'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    },
+  },
+  {
+    body: 'Minha filha tem TDAH e sempre lutou para se concentrar. O Reinforce oferece atividades interativas que mantêm sua atenção e a ajudam a progredir no seu próprio ritmo.',
+    author: {
+      name: 'Juliana Pereira',
+      handle: 'Mãe de aluna do 4º ano',
       imageUrl:
         'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    },
+  },
+  {
+    body: 'Como professor de ciências, adoro como o Reinforce torna conceitos complexos acessíveis através de visualizações e experimentos virtuais. Meus alunos estão fascinados!',
+    author: {
+      name: 'Prof. André Lima',
+      handle: 'Professor de Ciências',
+      imageUrl:
+        'https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    },
+  },
+  {
+    body: 'Como pai de gêmeos, era difícil dar atenção individualizada aos dois. O Reinforce oferece experiências personalizadas que atendem às necessidades específicas de cada um.',
+    author: {
+      name: 'Roberto Alves',
+      handle: 'Pai de alunos do 1º ano',
+      imageUrl:
+        'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    },
+  },
+  {
+    body: 'Implementamos o Reinforce em toda a nossa escola primária e vimos um aumento de 30% no desempenho em leitura. A abordagem adaptativa faz toda a diferença.',
+    author: {
+      name: 'Profa. Beatriz Costa',
+      handle: 'Diretora de Escola Primária',
+      imageUrl:
+        'https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    },
+  },
+  {
+    body: 'Minha filha com dislexia finalmente está ganhando confiança na leitura graças às ferramentas especializadas do Reinforce. É emocionante ver seu progresso diário.',
+    author: {
+      name: 'Fernanda Moraes',
+      handle: 'Mãe de aluna do 5º ano',
+      imageUrl:
+        'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
     },
   },
 ];
@@ -146,12 +164,15 @@ export default function TestimonialsSection() {
   };
 
   return (
-    <div id="testimonials" className="overflow-hidden bg-white h-screen items-center flex py-24 sm:py-32">
+    <div id="testimonials" className="overflow-hidden bg-[#F2B035] h-screen items-center flex py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-xl text-center mb-10">
           <h2 className="text-lg font-semibold leading-8 tracking-tight text-indigo-600">Depoimentos</h2>
           <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            O que nossos alunos dizem
+            O que educadores e pais dizem
+          </p>
+          <p className="mt-4 text-lg text-gray-700">
+            Veja como o Reinforce está transformando a educação fundamental
           </p>
         </div>
 
@@ -209,17 +230,34 @@ export default function TestimonialsSection() {
               ))}
             </div>
           </div>
-
-          <div className="mt-8 flex justify-center gap-2">
-            {[...Array(testimonials.length - itemsPerView + 1)].map((_, idx) => (
-              <button
-                key={idx}
-                className={`h-2 w-2 rounded-full transition-colors duration-200 ${
-                  idx === currentIndex ? 'bg-indigo-600' : 'bg-gray-300'
-                }`}
-                onClick={() => setCurrentIndex(idx)}
-              />
-            ))}
+          
+          <div className="mt-10 flex justify-center gap-x-6">
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentIndex(Math.max(0, currentIndex - 1));
+                setIsPaused(true);
+                setTimeout(() => setIsPaused(false), 1000);
+              }}
+              className="rounded-full bg-white p-2 text-gray-900 shadow-sm hover:bg-gray-100"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentIndex(Math.min(testimonials.length - itemsPerView, currentIndex + 1));
+                setIsPaused(true);
+                setTimeout(() => setIsPaused(false), 1000);
+              }}
+              className="rounded-full bg-white p-2 text-gray-900 shadow-sm hover:bg-gray-100"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>

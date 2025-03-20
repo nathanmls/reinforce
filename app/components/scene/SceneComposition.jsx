@@ -63,7 +63,7 @@ const SceneComposition = () => {
         size={1} 
         speed={0.3} 
         opacity={0.5}
-        color="#B4D45A" 
+        color="#B4D45A"
       />
       {/* Apply noise effect to the entire scene except characters */}
       <NoiseEffect intensity={0} scale={10.0} />

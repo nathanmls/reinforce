@@ -1,15 +1,122 @@
 "use client";
 
-import { animated } from "@react-spring/three";
+import { animated, useSpring } from "@react-spring/three";
 import { RoundedBox } from "@react-three/drei";
+import { useState } from "react";
 import BoyModel from "./BoyModel";
 import { RainbowFloor } from "./RainbowFloor";
-import ClientOnlyTextPlane from './ClientOnlyTextPlane';
+import ClientOnlyTextPlane from "./ClientOnlyTextPlane";
+import { useScroll } from "@/context/ScrollContext";
+import { useEffect } from "react";
 
-const WelcomeSection = ({ 
-  welcomementorSpring, 
-  isExplorationMode 
-}) => {
+// Define each element with its position and scale properties
+const WELCOME_ELEMENTS = [
+  {
+    id: "boy",
+    component: BoyModel,
+    position: [-4, -7.7, 0],
+    rotation: [0, Math.PI * 0.5, 0],
+    props: {
+      wireframe: false,
+    },
+  },
+  {
+    id: "learn-text",
+    component: ClientOnlyTextPlane,
+    position: [-4, -5.5, 0],
+    rotation: [0, Math.PI * 0.5, 0],
+    props: {
+      text: "Learn with friends",
+      textColor: "#000000",
+      backgroundColor: "rgba(240, 240, 240, 1)",
+      width: 2,
+      height: 0.5,
+      fontSize: 100,
+      fontWeight: "bold",
+      borderRadius: 25,
+      borderColor: "rgba(171, 39, 210, 0.8)",
+      borderWidth: 3,
+    },
+  },
+  {
+    id: "screen",
+    component: RoundedBox,
+    position: [-2, -7, -3],
+    rotation: [0, Math.PI * 0.11, 0],
+    props: {
+      args: [3, 2, 0.1],
+      radius: 0.05,
+      smoothness: 4,
+      bevelSegments: 4,
+      creaseAngle: 0.4,
+      children: <meshStandardMaterial color="#333333" />,
+    },
+  },
+  {
+    id: "screen-text",
+    component: ClientOnlyTextPlane,
+    position: [-2, -5, -2.9], // Slightly in front of the screen
+    rotation: [0, Math.PI * 0.11, 0],
+    props: {
+      text: ["Tire Dúvidas", "com um Professor"],
+      textColor: "#000000",
+      backgroundColor: "rgba(240, 240, 240, 1)",
+      width: 2,
+      height: 1,
+      fontSize: 80,
+      fontWeight: "bold",
+      borderRadius: 25,
+      borderColor: "rgba(171, 39, 210, 0.8)",
+      borderWidth: 3,
+    },
+  },
+];
+
+const WelcomeSection = ({ welcomementorSpring, isExplorationMode }) => {
+  const { welcomeProgress } = useScroll();
+  const [isBoyHovered, setIsBoyHovered] = useState(false);
+  const [isScreenHovered, setIsScreenHovered] = useState(false);
+
+  // Create a spring animation for scaling elements
+  const { scaleValue } = useSpring({
+    scaleValue: welcomeProgress > 0.5 ? 0 : 1,
+    config: {
+      mass: 1,
+      tension: 170,
+      friction: 26,
+    },
+  });
+
+  // Create a spring animation for the learn-text visibility
+  const learnTextSpring = useSpring({
+    scale: isBoyHovered ? 1 : 0,
+    opacity: isBoyHovered ? 1 : 0,
+    config: {
+      mass: 1,
+      tension: 280,
+      friction: 60,
+    },
+  });
+
+  // Create a spring animation for the screen-text visibility
+  const screenTextSpring = useSpring({
+    scale: isScreenHovered ? 1 : 0,
+    opacity: isScreenHovered ? 1 : 0,
+    config: {
+      mass: 1,
+      tension: 280,
+      friction: 60,
+    },
+  });
+
+  // Handle hover events for the BoyModel
+  const handleBoyPointerOver = () => setIsBoyHovered(true);
+  const handleBoyPointerOut = () => setIsBoyHovered(false);
+
+  // Handle hover events for the Screen
+  const handleScreenPointerOver = () => setIsScreenHovered(true);
+  const handleScreenPointerOut = () => setIsScreenHovered(false);
+
   return (
     <>
       <animated.group
@@ -17,79 +124,88 @@ const WelcomeSection = ({
         scale={welcomementorSpring.scale}
         opacity={welcomementorSpring.opacity}
       >
-        <group>
-          {/* Portal with TiaModel, BoyModel, etc. */}
-          <BoyModel wireframe={isExplorationMode} />
-          
-          {/* Text above Boy character */}
-          <ClientOnlyTextPlane
-            position={[-4, -5.5, 0]} // Positioned above the boy (who is at -4, -7.7, 0)
-            rotation={[0, Math.PI*0.5, 0]} // Same rotation as the boy
-            text="Learn with friends"
-            textColor="#000000"
-            backgroundColor="rgba(240, 240, 240, 1)" // White background with transparency
-            width={2}
-            height={0.5}
-            fontSize={100}
-            fontWeight="bold"
-            borderRadius={25}
-            borderColor="rgba(171, 39, 210, 0.8)" // Purple border matching your theme
-            borderWidth={3}
-          />
-          {/* Text above The Screen */}
-          <ClientOnlyTextPlane
-            position={[-2, -5, -3]} // Adjusted Y position to center vertically
-            rotation={[0, Math.PI*0.11, 0]}
-            text={["Tire Dúvidas", "com um Professor"]} // Array of lines instead of \n
-            textColor="#000000"
-            backgroundColor="rgba(240, 240, 240, 1)" // White background with transparency
-            width={2}
-            height={1}
-            fontSize={80}
-            fontWeight="bold"
-            borderRadius={25}
-            borderColor="rgba(171, 39, 210, 0.8)" // Purple border matching your theme
-            borderWidth={3}
-          />
-          {/* Text above Portal Tia */}
-          <ClientOnlyTextPlane
-            position={[1.5, -5.2, -2.5]} // Positioned above the portal
-            rotation={[0, Math.PI*1.85, 0]}
-            text="Mentor AI"
-            textColor="#000000"
-            backgroundColor="rgba(240, 240, 240, 1)" // White background with transparency
-            width={2}
-            height={0.5}
-            fontSize={100}
-            fontWeight="bold"
-            borderRadius={25}
-            borderColor="rgba(171, 39, 210, 0.8)" // Purple border matching your theme
-            borderWidth={3}
-          />
+        {/* Render elements with special handling for hover interactions */}
+        {WELCOME_ELEMENTS.map((element) => {
+          const Component = element.component;
 
-          {/* Screen with videocall with the Teacher*/}
-          <RoundedBox
-            args={[5.5, 3, 0.2]} // width, height, depth
-            radius={0.1} // corner radius
-            smoothness={4} // number of curve segments
-            rotation={[0, Math.PI / 9, 0]}
-            position={[-2, -7, -3]}
-            scale={0.5}
-            castShadow
-            receiveShadow
-          >
-            <meshStandardMaterial
-              color="#AB27D2"
-              metalness={0.2}
-              roughness={0.3}
-              envMapIntensity={1.5}
-            />
-          </RoundedBox>
+          // Special handling for BoyModel to pass wireframe prop and add hover events
+          if (element.id === "boy") {
+            return (
+              <animated.group
+                key={element.id}
+                position={element.position}
+                rotation={element.rotation}
+                scale={scaleValue}
+                onPointerOver={handleBoyPointerOver}
+                onPointerOut={handleBoyPointerOut}
+              >
+                <Component wireframe={isExplorationMode} />
+              </animated.group>
+            );
+          }
 
-          {/* Rainbow floor */}
-          <RainbowFloor />
-        </group>
+          // Special handling for learn-text to show only on hover
+          if (element.id === "learn-text") {
+            return (
+              <animated.group
+                key={element.id}
+                position={element.position}
+                rotation={element.rotation}
+                scale={learnTextSpring.scale}
+                opacity={learnTextSpring.opacity}
+              >
+                <Component {...element.props} />
+              </animated.group>
+            );
+          }
+
+          // Special handling for screen to add hover events
+          if (element.id === "screen") {
+            return (
+              <animated.group
+                key={element.id}
+                position={element.position}
+                rotation={element.rotation}
+                scale={scaleValue}
+                onPointerOver={handleScreenPointerOver}
+                onPointerOut={handleScreenPointerOut}
+              >
+                <Component {...element.props} />
+              </animated.group>
+            );
+          }
+
+          // Special handling for screen-text to show only on hover
+          if (element.id === "screen-text") {
+            return (
+              <animated.group
+                key={element.id}
+                position={element.position}
+                rotation={element.rotation}
+                scale={screenTextSpring.scale}
+                opacity={screenTextSpring.opacity}
+              >
+                <Component {...element.props} />
+              </animated.group>
+            );
+          }
+
+          // For other components
+          return (
+            <animated.group
+              key={element.id}
+              position={element.position}
+              rotation={element.rotation}
+              scale={scaleValue}
+            >
+              <Component {...element.props} />
+            </animated.group>
+          );
+        })}
+
+        {/* Rainbow floor is always visible */}
       </animated.group>
+      <RainbowFloor />
     </>
   );
 };

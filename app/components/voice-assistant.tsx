@@ -1,13 +1,18 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useConversation } from '@11labs/react';
-import { useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { useAuth } from '../context/AuthContext';
 import dynamic from 'next/dynamic';
+
+// Import the ClientOnlyTiaChatInterface component
+const ClientOnlyTiaChatInterface = dynamic(
+  () => import('./scene/ClientOnlyTiaChatInterface'),
+  { ssr: false }
+);
 
 // Import TiaCharScene with dynamic import to avoid SSR issues
 const TiaCharScene = dynamic(() => import('./TiaCharScene'), { ssr: false });
@@ -16,15 +21,28 @@ const TiaCharScene = dynamic(() => import('./TiaCharScene'), { ssr: false });
 const ClientTiaCharScene = ({ 
   isActive, 
   intensity = 1,
-  institutionId 
+  institutionId,
+  messages,
+  onSendMessage,
+  typingSpeed
 }: { 
   isActive: boolean; 
   intensity?: number;
   institutionId?: string;
+  messages: any[];
+  onSendMessage: (message: any) => void;
+  typingSpeed: number;
 }) => {
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full relative">
       <TiaCharScene isActive={isActive} intensity={intensity} />
+      <div className="absolute top-0 right-0 h-full p-4 flex items-center">
+        <ClientOnlyTiaChatInterface 
+          messages={messages} 
+          onSendMessage={onSendMessage} 
+          typingSpeed={typingSpeed}
+        />
+      </div>
     </div>
   );
 };
@@ -55,6 +73,9 @@ const VoiceAssistant = () => {
     latency: 0,
     audioBufferSize: 4000, // Default buffer size (0.25s at 16kHz)
   });
+
+  const [useFallbackMode, setUseFallbackMode] = useState(false);
+  const [fallbackInitialized, setFallbackInitialized] = useState(false);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const retryTimeoutRef = useRef<NodeJS.Timeout>();
@@ -120,7 +141,7 @@ const VoiceAssistant = () => {
         }));
         
         // Send pong response
-        conversation.send({
+        (conversation as any).send({
           type: 'pong',
           event_id: message.ping_event.event_id
         });
@@ -165,18 +186,153 @@ const VoiceAssistant = () => {
     },
   });
 
+  // Create a wrapper for the conversation API to handle method differences
+  const conversationApi = useMemo(() => {
+    return {
+      ...conversation,
+      // Safe wrapper for send method
+      sendMessage: (message: string) => {
+        if (useFallbackMode) {
+          // In fallback mode, simulate a response locally
+          console.log('Using fallback mode to handle message:', message);
+          
+          // Add user message to state (already done in the onSendMessage handler)
+          
+          // Simulate AI thinking with a delay
+          setTimeout(() => {
+            // Add a "typing" message from the AI
+            setState(prev => ({
+              ...prev,
+              messages: [...prev.messages, {
+                role: 'agent',
+                message: 'Thinking...',
+                tentative: true,
+                timeInCallSecs: Date.now() / 1000
+              }]
+            }));
+            
+            // After another delay, replace with the actual response
+            setTimeout(() => {
+              // Generate a fallback response based on the user's message
+              let response = '';
+              const userMessage = message.toLowerCase();
+              
+              if (userMessage.includes('hello') || userMessage.includes('hi') || userMessage.includes('hey')) {
+                response = "Hello! I'm Tia, your AI assistant for Reinforce. How can I help you today?";
+              } else if (userMessage.includes('how are you')) {
+                response = "I'm doing well, thank you for asking! I'm here to help you with anything related to Reinforce.";
+              } else if (userMessage.includes('reinforce') || userMessage.includes('platform')) {
+                response = "Reinforce is an innovative platform designed to enhance learning experiences through AI-powered interactions. Our goal is to make education more engaging and personalized.";
+              } else if (userMessage.includes('feature') || userMessage.includes('can you do')) {
+                response = "As your Reinforce assistant, I can help with answering questions, providing information about our platform, and guiding you through various features. In the future, I'll have even more capabilities!";
+              } else if (userMessage.includes('thank')) {
+                response = "You're welcome! I'm happy to help. Let me know if you need anything else.";
+              } else {
+                // Default responses for other queries
+                const fallbackResponses = [
+                  "That's an interesting question. Reinforce is designed to help with exactly that kind of challenge.",
+                  "Great question! Reinforce has several features that might help with that.",
+                  "I understand what you're asking. Let me explain how Reinforce approaches this topic.",
+                  "I'm still learning, but I'd be happy to assist with what I know about Reinforce.",
+                  "Reinforce is constantly evolving to better address questions like yours."
+                ];
+                
+                const responseIndex = Math.floor(Math.random() * fallbackResponses.length);
+                response = fallbackResponses[responseIndex];
+              }
+              
+              // Update the message list, replacing the tentative message
+              setState(prev => ({
+                ...prev,
+                messages: prev.messages.filter(m => !m.tentative).concat([{
+                  role: 'agent',
+                  message: response,
+                  timeInCallSecs: Date.now() / 1000
+                }])
+              }));
+            }, 1500);
+          }, 500);
+          
+          return;
+        }
+        
+        // Normal API mode
+        if (conversation.status === 'connected') {
+          try {
+            // Use the send method that's part of the API with type assertion
+            // to work around TypeScript errors
+            (conversation as any).send({
+              type: 'text_message',
+              text: message
+            });
+            console.log('Message sent successfully');
+          } catch (error) {
+            console.error('Error sending message:', error);
+            // If API fails, switch to fallback mode
+            setUseFallbackMode(true);
+            // Retry sending the message in fallback mode
+            setTimeout(() => conversationApi.sendMessage(message), 100);
+          }
+        } else {
+          console.warn('Cannot send message: conversation not connected');
+        }
+      }
+    };
+  }, [conversation, useFallbackMode]);
+
   const getSignedUrl = async (): Promise<string> => {
-    const response = await fetch("/api/get-signed-url");
-    if (!response.ok) {
-      throw new Error(`Failed to get signed url: ${response.statusText}`);
+    try {
+      const response = await fetch("/api/get-signed-url");
+      if (!response.ok) {
+        throw new Error(`Failed to get signed url: ${response.statusText}`);
+      }
+      const data = await response.json();
+      
+      if (!data.signedUrl) {
+        throw new Error('No signed URL returned from API');
+      }
+      
+      console.log('Successfully retrieved signed URL');
+      return data.signedUrl;
+    } catch (error) {
+      console.error('Error getting signed URL:', error);
+      throw error;
     }
-    const { signedUrl } = await response.json();
-    return signedUrl;
   };
 
   const startConversation = useCallback(async () => {
     try {
       setState(prev => ({ ...prev, error: null, isLoading: true }));
+      
+      // If we're in fallback mode, just simulate a successful connection
+      if (useFallbackMode) {
+        console.log('Using fallback mode for conversation');
+        
+        // If this is the first time initializing fallback mode, add a welcome message
+        if (!fallbackInitialized) {
+          setState(prev => ({ 
+            ...prev, 
+            isLoading: false,
+            connected: true,
+            messages: [
+              ...prev.messages,
+              {
+                role: 'agent',
+                message: "Hello! I'm Tia, your AI assistant for Reinforce. I'm currently running in fallback mode due to API connection issues, but I'm still here to help you!",
+                timeInCallSecs: Date.now() / 1000
+              }
+            ]
+          }));
+          setFallbackInitialized(true);
+        } else {
+          setState(prev => ({ 
+            ...prev, 
+            isLoading: false,
+            connected: true
+          }));
+        }
+        return;
+      }
       
       // Check for audio permissions and setup
       const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -197,164 +353,182 @@ const VoiceAssistant = () => {
         throw new Error('No audio input devices found');
       }
 
+      console.log('Getting signed URL...');
       const signedUrl = await getSignedUrl();
-      await conversation.startSession({ 
+      console.log('Got signed URL, starting session...');
+      
+      // Create session options with required parameters
+      const sessionOptions = {
         signedUrl,
-        protocol: 'convai',
-        audioChunkSize: state.audioBufferSize,
+        initialMessages: [
+          {
+            role: 'system',
+            message: `You are Tia, an AI assistant for Reinforce.
+You are helpful, knowledgeable, and friendly.
+You provide concise, accurate information.
+If you don't know something, admit it rather than making up information.
+The current date is ${new Date().toISOString().split('T')[0]}.
+The user's name is ${user?.name || 'there'}.
+${user?.institution?.name ? `The user is from ${user.institution.name}.` : ''}
+`
+          }
+        ]
+      };
+      
+      // Try to start the session with the API
+      console.log('Starting conversation session...');
+      try {
+        await conversation.startSession(sessionOptions);
+        console.log('Conversation session started successfully');
+      } catch (error) {
+        console.error('Failed to start conversation with API:', error);
+        // Switch to fallback mode if API fails
+        setUseFallbackMode(true);
+        setState(prev => ({ 
+          ...prev, 
+          isLoading: false,
+          connected: true
+        }));
+        return;
+      }
+      
+      // Clean up audio stream when the session ends
+      stream.getTracks().forEach(track => {
+        // Add event listener to handle track ending
+        track.addEventListener('ended', () => {
+          console.log('Audio track ended');
+        });
       });
-
-      // Cleanup audio stream
-      stream.getTracks().forEach(track => track.stop());
-
+      
     } catch (error) {
-      setState(prev => ({
-        ...prev,
+      console.error('Failed to start conversation:', error);
+      setState(prev => ({ 
+        ...prev, 
         error: error instanceof Error ? error.message : 'Failed to start conversation',
         isLoading: false
       }));
-    }
-  }, [conversation, state.audioBufferSize]);
-
-  const stopConversation = useCallback(async () => {
-    try {
-      setState(prev => ({ ...prev, isLoading: true }));
-      await conversation.endSession();
+      
+      // Switch to fallback mode if there's an error
+      setUseFallbackMode(true);
       setState(prev => ({ 
         ...prev, 
-        error: null,
         isLoading: false,
-        messages: [],
-      }));
-    } catch (error) {
-      setState(prev => ({
-        ...prev,
-        error: error instanceof Error ? error.message : 'Failed to stop conversation',
-        isLoading: false
+        connected: true
       }));
     }
-  }, [conversation]);
+  }, [conversation, user, useFallbackMode]);
+
+  const stopConversation = useCallback(() => {
+    if (useFallbackMode) {
+      // In fallback mode, just update the state
+      setState(prev => ({ 
+        ...prev, 
+        connected: false
+      }));
+      return;
+    }
+    
+    if (conversation.status === 'connected') {
+      try {
+        conversation.endSession();
+        console.log('Conversation session ended');
+      } catch (error) {
+        console.error('Error ending session:', error);
+      }
+    }
+  }, [conversation, useFallbackMode]);
 
   return (
-    <div className="flex flex-col md:flex-row h-full w-full">
-      {/* TiaChar Scene - Takes full height and fills available width */}
-      <div className="w-full md:w-1/2 h-[400px] md:h-full">
+    <div className="relative w-full h-full bg-gradient-to-b from-black to-purple-900 overflow-hidden">
+      {/* TiaChar 3D Scene with Chat Interface */}
+      <div className="w-full h-full">
         <ClientTiaCharScene 
-          isActive={conversation.status === 'connected'} 
-          intensity={state.messages.length > 0 ? 1 : 0.5}
-          institutionId={user?.institutionId}
+          isActive={conversation.status === 'connected' || useFallbackMode} 
+          intensity={conversation.status === 'connected' || useFallbackMode ? 1 : 0.5}
+          institutionId={user?.institution?.id}
+          messages={state.messages}
+          onSendMessage={(message) => {
+            // Add the user message to the conversation
+            setState(prev => ({
+              ...prev,
+              messages: [...prev.messages, {
+                role: 'user',
+                message: message.message,
+                timeInCallSecs: Date.now() / 1000
+              }]
+            }));
+            
+            // Send the message to the conversation API
+            if (conversation.status === 'connected') {
+              // Use the safe wrapper method
+              conversationApi.sendMessage(message.message);
+            } else if (conversation.status === 'disconnected' || useFallbackMode) {
+              // If in fallback mode or disconnected, start the conversation
+              if (useFallbackMode) {
+                // Directly use the fallback mode
+                conversationApi.sendMessage(message.message);
+              } else {
+                // Try to start the conversation with the API first
+                startConversation().then(() => {
+                  // Send the message after connection is established
+                  setTimeout(() => {
+                    conversationApi.sendMessage(message.message);
+                  }, 1000);
+                });
+              }
+            }
+          }}
+          typingSpeed={50}
         />
       </div>
 
-      {/* Chat Interface */}
-      <div className="w-full md:w-1/2 h-full flex flex-col">
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {state.messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex ${
-                message.role === 'user' ? 'justify-end' : 'justify-start'
-              }`}
-            >
-              <div
-                className={`max-w-[80%] p-3 rounded-lg ${
-                  message.role === 'user'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-200 text-gray-800'
-                } ${message.tentative ? 'opacity-70' : ''}`}
-              >
-                {message.message}
-              </div>
-            </div>
-          ))}
-          <div ref={chatEndRef} />
-        </div>
-
-        <div className="p-4 border-t border-gray-200">
-          {state.error && (
-            <div className="mb-4 p-3 bg-red-100 text-red-800 rounded-lg">
-              Error: {state.error}
-            </div>
-          )}
-
-          <div className="flex justify-center items-center">
-            {conversation.status === 'disconnected' ? (
-              <button
-                onClick={startConversation}
-                disabled={state.isLoading}
-                className="px-6 py-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center"
-              >
-                {state.isLoading ? (
-                  <>
-                    <svg
-                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Connecting...
-                  </>
-                ) : (
-                  <>
-                    <svg
-                      className="w-5 h-5 mr-2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
-                      ></path>
-                    </svg>
-                    Start Conversation
-                  </>
-                )}
-              </button>
-            ) : (
-              <button
-                onClick={stopConversation}
-                className="px-6 py-3 bg-red-600 text-white rounded-full shadow-lg hover:bg-red-700 transition-colors flex items-center"
-              >
-                <svg
-                  className="w-5 h-5 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  ></path>
-                </svg>
-                End Conversation
-              </button>
-            )}
+      {/* Voice Status Indicator */}
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex flex-col items-center">
+        <motion.div
+          className={`w-16 h-16 rounded-full flex items-center justify-center ${conversation.status === 'connected' ? 'bg-green-500' : 'bg-gray-500'}`}
+          animate={{
+            scale: conversation.status === 'connected' ? [1, 1.1, 1] : 1,
+            opacity: conversation.status === 'connected' ? 1 : 0.7,
+          }}
+          transition={{
+            scale: {
+              repeat: Infinity,
+              duration: 2
+            }
+          }}
+          onClick={conversation.status === 'disconnected' ? startConversation : stopConversation}
+        >
+          <div className="text-white text-2xl">
+            {conversation.status === 'disconnected' && '🎤'}
+            {conversation.status === 'connecting' && '⏳'}
+            {conversation.status === 'connected' && '🔊'}
+            {conversation.status === 'disconnecting' && '⏳'}
           </div>
+        </motion.div>
+        <div className="mt-2 text-white text-sm">
+          {conversation.status === 'disconnected' && 'Click to start'}
+          {conversation.status === 'connecting' && 'Connecting...'}
+          {conversation.status === 'connected' && 'Listening...'}
+          {conversation.status === 'disconnecting' && 'Disconnecting...'}
         </div>
+        {state.error && (
+          <div className="mt-2 text-red-500 text-xs max-w-xs text-center">
+            {state.error}
+          </div>
+        )}
       </div>
+
+      {/* Debug Info - can be removed in production */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="absolute top-2 left-2 text-xs text-white bg-black/50 p-2 rounded">
+          <div>Status: {conversation.status}</div>
+          <div>Latency: {state.latency.toFixed(0)}ms</div>
+          <div>Buffer: {state.audioBufferSize} samples</div>
+          <div>Messages: {state.messages.length}</div>
+        </div>
+      )}
     </div>
   );
-}
+};
 
 export default VoiceAssistant;

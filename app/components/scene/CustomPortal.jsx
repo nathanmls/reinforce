@@ -110,6 +110,7 @@ export default function CustomPortal({
   rotation = [0, 0, 0],
   scale = 1,
   wireframe = false,
+  onHoverChange = null,
 }) {
   const portalRef = useRef();
   const lightRef = useRef();
@@ -120,6 +121,13 @@ export default function CustomPortal({
   useEffect(() => {
     setIsMounted(true);
   }, []);
+  
+  // Notify parent component about hover state changes
+  useEffect(() => {
+    if (onHoverChange) {
+      onHoverChange(hovered);
+    }
+  }, [hovered, onHoverChange]);
   
   // Create portal geometry using extruded shape instead of roundedBoxGeometry
   const portalGeometry = useMemo(() => {
@@ -172,7 +180,7 @@ export default function CustomPortal({
     if (portalRef.current) {
       portalRef.current.blend = THREE.MathUtils.lerp(
         portalRef.current.blend,
-        hovered ? 1 : 0,
+        hovered ? 0 : 0,
         0.1
       );
     }

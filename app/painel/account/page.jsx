@@ -8,8 +8,11 @@ import { db, storage } from '../../firebase/config';
 import { useRouter } from 'next/navigation';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import ProfileImage from '../../components/ProfileImage';
+import ClientOnlyFirebase from '@/components/ClientOnlyFirebase';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
-export default function AccountPage() {
+// Separate the content component from the container
+function AccountContent() {
   const router = useRouter();
   const { user, userRole, userProfile, updateUserProfile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
@@ -39,6 +42,15 @@ export default function AccountPage() {
 
       try {
         setLoading(true);
+        
+        // Check if db is initialized
+        if (!db) {
+          console.error('Firestore not initialized');
+          setError('Database connection not available');
+          setLoading(false);
+          return;
+        }
+        
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         
         if (userDoc.exists()) {
@@ -200,212 +212,271 @@ export default function AccountPage() {
     }
   };
 
-  const handleResetPassword = async () => {
-    if (!user?.email) return;
-    
-    if (!window.confirm('Are you sure you want to reset your password? You will receive an email with instructions.')) {
-      return;
-    }
-
-    try {
-      setResetLoading(true);
-      setError('');
-      setSuccessMessage('');
-      
-      await sendPasswordResetEmail(user, user.email);
-      setSuccessMessage('Password reset email sent. Please check your inbox.');
-    } catch (err) {
-      console.error('Error resetting password:', err);
-      setError('Failed to send password reset email');
-    } finally {
-      setResetLoading(false);
-    }
-  };
-
   const handleDeleteAccount = async () => {
-    if (!window.confirm('Are you absolutely sure you want to delete your account? This action cannot be undone.')) {
-      return;
-    }
-
-    const confirmEmail = window.prompt('Please enter your email address to confirm account deletion:');
-    if (confirmEmail !== user?.email) {
-      setError('Email address does not match. Account deletion cancelled.');
+    if (!window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
       return;
     }
 
     try {
       setDeleteLoading(true);
       setError('');
-      setSuccessMessage('');
 
-      // Delete user data from Firestore
+      // Delete profile image from storage if it exists
+      if (formData.profileImage) {
+        try {
+          const imageRef = ref(storage, `profile-images/${user.uid}.webp`);
+          await deleteObject(imageRef);
+        } catch (err) {
+          console.error('Error deleting profile image:', err);
+          // Continue with account deletion even if image deletion fails
+        }
+      }
+
+      // Delete user document from Firestore
       await deleteDoc(doc(db, 'users', user.uid));
-      
-      // Delete user from Firebase Auth
+
+      // Delete user authentication account
       await deleteUser(user);
-      
-      // Logout and redirect to home
-      await updateUserProfile(user.uid);
-      await logout();
+
+      // Redirect to home page
       router.push('/');
     } catch (err) {
       console.error('Error deleting account:', err);
-      setError('Failed to delete account. You may need to re-login before deleting your account.');
-    } finally {
+      
+      if (err.code === 'auth/requires-recent-login') {
+        setError('For security reasons, you need to sign in again before deleting your account.');
+      } else {
+        setError('Failed to delete account. Please try again later.');
+      }
+      
       setDeleteLoading(false);
     }
   };
 
+  const handleResetPassword = async () => {
+    if (!user || !user.email) {
+      setError('No email associated with this account');
+      return;
+    }
+
+    try {
+      setResetLoading(true);
+      setError('');
+      
+      await sendPasswordResetEmail(user.auth, user.email);
+      
+      setSuccessMessage('Password reset email sent. Check your inbox.');
+      setTimeout(() => setSuccessMessage(''), 5000);
+    } catch (err) {
+      console.error('Error sending password reset:', err);
+      setError('Failed to send password reset email. Please try again later.');
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-6">Account Settings</h1>
-
+    <div className="max-w-4xl mx-auto">
+      <h1 className="text-3xl font-semibold text-gray-800 mb-6">Account Settings</h1>
+      
       {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
           {error}
         </div>
       )}
-
+      
       {successMessage && (
-        <div className="mb-4 p-4 bg-green-50 border border-green-200 text-green-600 rounded-lg">
+        <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-600 rounded-lg">
           {successMessage}
         </div>
       )}
-
-      <div className="bg-white shadow rounded-lg">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Profile Image</h2>
-          <ProfileImage
-            onImageUpload={handleImageUpload}
-            currentImage={formData.profileImage}
-          />
-          {saveLoading && (
-            <div className="mt-2 text-sm text-gray-600 flex items-center">
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Uploading image...
-            </div>
-          )}
-          {successMessage && (
-            <div className="mt-2 text-sm text-green-600">
-              {successMessage}
-            </div>
-          )}
-        </div>
-
-        <div className="p-6 space-y-6">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Full Name
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                disabled={!isEditing || isStudent}
-                className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+      
+      <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+        <div className="p-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-6">
+            <div className="flex-shrink-0">
+              <ProfileImage 
+                src={formData.profileImage} 
+                alt={formData.name} 
+                size={96} 
+                onImageUpload={handleImageUpload}
+                editable={!isStudent}
+                loading={saveLoading}
               />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={formData.email}
-                disabled
-                className="w-full px-4 py-2 border rounded-lg bg-gray-100"
-              />
+              <h2 className="text-2xl font-semibold text-gray-800">{formData.name}</h2>
+              <p className="text-gray-600">{formData.email}</p>
+              <p className="text-sm text-gray-500 mt-1 capitalize">{formData.role}</p>
             </div>
-
-            {isStudent && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Grade Level
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.grade}
-                    disabled
-                    className="w-full px-4 py-2 border rounded-lg bg-gray-100"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Preferred Subjects
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.subjects.join(', ')}
-                    disabled
-                    className="w-full px-4 py-2 border rounded-lg bg-gray-100"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Parent's Email
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.parentEmail}
-                    disabled
-                    className="w-full px-4 py-2 border rounded-lg bg-gray-100"
-                  />
-                </div>
-              </>
-            )}
           </div>
+          
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  disabled={!isEditing || isStudent}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  disabled={true}
+                  className="w-full px-4 py-2 border rounded-lg bg-gray-100 text-gray-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Email cannot be changed directly. Please contact support for assistance.
+                </p>
+              </div>
+              
+              {isStudent && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Grade Level
+                    </label>
+                    <input
+                      type="text"
+                      name="grade"
+                      value={formData.grade}
+                      disabled={true}
+                      className="w-full px-4 py-2 border rounded-lg bg-gray-100 text-gray-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Parent Email
+                    </label>
+                    <input
+                      type="email"
+                      name="parentEmail"
+                      value={formData.parentEmail}
+                      disabled={true}
+                      className="w-full px-4 py-2 border rounded-lg bg-gray-100 text-gray-500"
+                    />
+                  </div>
+                </>
+              )}
+              
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="notifications"
+                  name="notifications"
+                  checked={formData.notifications}
+                  onChange={handleInputChange}
+                  disabled={!isEditing || isStudent}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="notifications" className="ml-2 block text-sm text-gray-700">
+                  Receive email notifications
+                </label>
+              </div>
+            </div>
+            
+            <div className="mt-6 flex flex-wrap gap-4">
+              {!isStudent && (
+                <button
+                  type="submit"
+                  disabled={saveLoading}
+                  className={`px-4 py-2 rounded-lg font-medium ${
+                    isEditing
+                      ? 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                  } transition-colors`}
+                >
+                  {saveLoading ? 'Saving...' : isEditing ? 'Save Changes' : 'Edit Profile'}
+                </button>
+              )}
+              
+              {isEditing && !isStudent && (
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(false)}
+                  className="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+          </form>
         </div>
-
-        {!isStudent && (
-          <div className="flex justify-end mt-6">
-            <button
-              type="submit"
-              disabled={saveLoading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-            >
-              {isEditing ? (saveLoading ? 'Saving...' : 'Save Changes') : 'Edit Profile'}
-            </button>
-          </div>
-        )}
       </div>
-
-      {!isStudent && (
-        <div className="p-6 bg-gray-50 border-t border-gray-200">
-          <h3 className="text-lg font-medium text-red-600 mb-4">Danger Zone</h3>
+      
+      <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+        <div className="p-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Security</h2>
+          
           <div className="space-y-4">
-            <button
-              type="button"
-              className="w-full px-4 py-2 text-left border border-red-300 text-red-700 rounded-lg hover:bg-red-50"
-              onClick={handleResetPassword}
-            >
-              Reset Password
-            </button>
-            <button
-              type="button"
-              className="w-full px-4 py-2 text-left border border-red-300 text-red-700 rounded-lg hover:bg-red-50"
-              onClick={handleDeleteAccount}
-            >
-              Delete Account
-            </button>
+            <div>
+              <button
+                onClick={handleResetPassword}
+                disabled={resetLoading}
+                className="px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg font-medium hover:bg-yellow-200 transition-colors"
+              >
+                {resetLoading ? 'Sending...' : 'Reset Password'}
+              </button>
+              <p className="text-sm text-gray-500 mt-1">
+                We'll send a password reset link to your email address.
+              </p>
+            </div>
+            
+            <div>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleteLoading}
+                className="px-4 py-2 bg-red-100 text-red-800 rounded-lg font-medium hover:bg-red-200 transition-colors"
+              >
+                {deleteLoading ? 'Deleting...' : 'Delete Account'}
+              </button>
+              <p className="text-sm text-gray-500 mt-1">
+                This action cannot be undone. All your data will be permanently deleted.
+              </p>
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
+  );
+}
+
+// Main component that wraps the content with ClientOnlyFirebase
+export default function AccountPage() {
+  return (
+    <ClientOnlyFirebase fallback={<LoadingSpinner message="Loading account data..." />}>
+      <AccountContent />
+    </ClientOnlyFirebase>
   );
 }
