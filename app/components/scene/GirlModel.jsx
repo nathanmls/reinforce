@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useGLTF } from "@react-three/drei";
-import * as THREE from "three";
+import { useEffect } from 'react';
+import { useGLTF } from '@react-three/drei';
+import * as THREE from 'three';
 
 export default function GirlModel() {
-  const { scene } = useGLTF("/models/GirlChar.glb");
+  const { scene } = useGLTF('/models/GirlChar.glb');
 
   useEffect(() => {
     scene.traverse((child) => {
@@ -34,7 +34,7 @@ export default function GirlModel() {
       object={scene}
       rotation={[0, 0, 0]}
       scale={3.5}
-      position={[0, 1.95, 0]}
+      position={[0, 1.83, 0]}
       castShadow
       receiveShadow
     />
@@ -42,4 +42,4 @@ export default function GirlModel() {
 }
 
 // Preload the model
-useGLTF.preload("/models/GirlChar.glb");
+useGLTF.preload('/models/GirlChar.glb');

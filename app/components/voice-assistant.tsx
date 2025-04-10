@@ -14,32 +14,41 @@ const ClientOnlyTiaChatInterface = dynamic(
   { ssr: false }
 );
 
-// Import TiaCharScene with dynamic import to avoid SSR issues
-const TiaCharScene = dynamic(() => import('./TiaCharScene'), { ssr: false });
+// Import AppScene with dynamic import to avoid SSR issues
+const AppScene = dynamic(() => import('./AppScene'), { ssr: false });
 
-// Client-only wrapper for TiaCharScene to handle "window is not defined" errors
-const ClientTiaCharScene = ({ 
-  isActive, 
+// Client-only wrapper for AppScene to handle "window is not defined" errors
+const ClientAppScene = ({
+  isActive,
   intensity = 1,
   institutionId,
   messages,
   onSendMessage,
-  typingSpeed
-}: { 
-  isActive: boolean; 
+  typingSpeed,
+  language = 'en',
+}: {
+  isActive: boolean;
   intensity?: number;
   institutionId?: string;
   messages: any[];
   onSendMessage: (message: any) => void;
   typingSpeed: number;
+  language?: string;
 }) => {
   return (
     <div className="w-full h-full relative">
-      <TiaCharScene isActive={isActive} intensity={intensity} />
-      <div className="absolute top-0 right-0 h-full p-4 flex items-center">
-        <ClientOnlyTiaChatInterface 
-          messages={messages} 
-          onSendMessage={onSendMessage} 
+      <AppScene 
+        isActive={isActive} 
+        intensity={intensity}
+        dialogHistory={messages}
+        onSendMessage={onSendMessage}
+        typingSpeed={typingSpeed}
+        language={language}
+      />
+      <div className="absolute bottom-0 right-1/2 transform translate-x-1/2 h-1/3 p-4 w-full flex items-end">
+        <ClientOnlyTiaChatInterface
+          messages={messages}
+          onSendMessage={onSendMessage}
           typingSpeed={typingSpeed}
         />
       </div>
@@ -98,14 +107,14 @@ const VoiceAssistant = () => {
   // Adaptive buffer size based on latency
   useEffect(() => {
     if (state.latency > 100) {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
-        audioBufferSize: Math.min(8000, prev.audioBufferSize + 1000)
+        audioBufferSize: Math.min(8000, prev.audioBufferSize + 1000),
       }));
     } else if (state.latency < 50 && state.audioBufferSize > 4000) {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
-        audioBufferSize: Math.max(4000, prev.audioBufferSize - 1000)
+        audioBufferSize: Math.max(4000, prev.audioBufferSize - 1000),
       }));
     }
   }, [state.latency]);
@@ -113,19 +122,19 @@ const VoiceAssistant = () => {
   const conversation = useConversation({
     onConnect: () => {
       console.log('Connected');
-      setState(prev => ({ 
-        ...prev, 
+      setState((prev) => ({
+        ...prev,
         error: null,
         isLoading: false,
-        retryCount: 0
+        retryCount: 0,
       }));
     },
     onDisconnect: () => {
       console.log('Disconnected');
-      setState(prev => ({ 
-        ...prev, 
+      setState((prev) => ({
+        ...prev,
         error: null,
-        isLoading: false
+        isLoading: false,
       }));
     },
     onMessage: (message) => {
@@ -134,51 +143,61 @@ const VoiceAssistant = () => {
         const currentTime = Date.now();
         const latency = currentTime - lastPingTimeRef.current;
         lastPingTimeRef.current = currentTime;
-        
-        setState(prev => ({
+
+        setState((prev) => ({
           ...prev,
-          latency: (latency + pingTime) / 2
+          latency: (latency + pingTime) / 2,
         }));
-        
+
         // Send pong response
         (conversation as any).send({
           type: 'pong',
-          event_id: message.ping_event.event_id
+          event_id: message.ping_event.event_id,
         });
-      }
-      else if (message.type === 'internal_tentative_agent_response') {
-        setState(prev => ({
+      } else if (message.type === 'internal_tentative_agent_response') {
+        setState((prev) => ({
           ...prev,
-          messages: [...prev.messages, {
-            role: 'agent',
-            message: message.tentative_agent_response_internal_event.tentative_agent_response,
-            timeInCallSecs: Date.now() / 1000,
-            tentative: true
-          }]
+          messages: [
+            ...prev.messages,
+            {
+              role: 'agent',
+              message:
+                message.tentative_agent_response_internal_event
+                  .tentative_agent_response,
+              timeInCallSecs: Date.now() / 1000,
+              tentative: true,
+            },
+          ],
         }));
-      }
-      else if (message.transcript) {
-        setState(prev => ({
+      } else if (message.transcript) {
+        setState((prev) => ({
           ...prev,
-          messages: [...prev.messages.filter(m => !m.tentative), {
-            role: message.transcript.role,
-            message: message.transcript.message,
-            timeInCallSecs: message.transcript.time_in_call_secs
-          }]
+          messages: [
+            ...prev.messages.filter((m) => !m.tentative),
+            {
+              role: message.transcript.role,
+              message: message.transcript.message,
+              timeInCallSecs: message.transcript.time_in_call_secs,
+            },
+          ],
         }));
       }
     },
     onError: (error) => {
-      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-      setState(prev => ({
+      const errorMessage =
+        error instanceof Error ? error.message : 'An unexpected error occurred';
+      setState((prev) => ({
         ...prev,
         error: errorMessage,
         retryCount: prev.retryCount + 1,
-        isLoading: false
+        isLoading: false,
       }));
-      
+
       if (state.retryCount < 3) {
-        const backoffTime = Math.min(2000 * Math.pow(2, state.retryCount), 10000);
+        const backoffTime = Math.min(
+          2000 * Math.pow(2, state.retryCount),
+          10000
+        );
         retryTimeoutRef.current = setTimeout(() => {
           startConversation();
         }, backoffTime);
@@ -195,67 +214,91 @@ const VoiceAssistant = () => {
         if (useFallbackMode) {
           // In fallback mode, simulate a response locally
           console.log('Using fallback mode to handle message:', message);
-          
+
           // Add user message to state (already done in the onSendMessage handler)
-          
+
           // Simulate AI thinking with a delay
           setTimeout(() => {
             // Add a "typing" message from the AI
-            setState(prev => ({
+            setState((prev) => ({
               ...prev,
-              messages: [...prev.messages, {
-                role: 'agent',
-                message: 'Thinking...',
-                tentative: true,
-                timeInCallSecs: Date.now() / 1000
-              }]
+              messages: [
+                ...prev.messages,
+                {
+                  role: 'agent',
+                  message: 'Thinking...',
+                  tentative: true,
+                  timeInCallSecs: Date.now() / 1000,
+                },
+              ],
             }));
-            
+
             // After another delay, replace with the actual response
             setTimeout(() => {
               // Generate a fallback response based on the user's message
               let response = '';
               const userMessage = message.toLowerCase();
-              
-              if (userMessage.includes('hello') || userMessage.includes('hi') || userMessage.includes('hey')) {
-                response = "Hello! I'm Tia, your AI assistant for Reinforce. How can I help you today?";
+
+              if (
+                userMessage.includes('hello') ||
+                userMessage.includes('hi') ||
+                userMessage.includes('hey')
+              ) {
+                response =
+                  "Hello! I'm Tia, your AI assistant for Reinforce. How can I help you today?";
               } else if (userMessage.includes('how are you')) {
-                response = "I'm doing well, thank you for asking! I'm here to help you with anything related to Reinforce.";
-              } else if (userMessage.includes('reinforce') || userMessage.includes('platform')) {
-                response = "Reinforce is an innovative platform designed to enhance learning experiences through AI-powered interactions. Our goal is to make education more engaging and personalized.";
-              } else if (userMessage.includes('feature') || userMessage.includes('can you do')) {
-                response = "As your Reinforce assistant, I can help with answering questions, providing information about our platform, and guiding you through various features. In the future, I'll have even more capabilities!";
+                response =
+                  "I'm doing well, thank you for asking! I'm here to help you with anything related to Reinforce.";
+              } else if (
+                userMessage.includes('reinforce') ||
+                userMessage.includes('platform')
+              ) {
+                response =
+                  'Reinforce is an innovative platform designed to enhance learning experiences through AI-powered interactions. Our goal is to make education more engaging and personalized.';
+              } else if (
+                userMessage.includes('feature') ||
+                userMessage.includes('can you do')
+              ) {
+                response =
+                  "As your Reinforce assistant, I can help with answering questions, providing information about our platform, and guiding you through various features. In the future, I'll have even more capabilities!";
               } else if (userMessage.includes('thank')) {
-                response = "You're welcome! I'm happy to help. Let me know if you need anything else.";
+                response =
+                  "You're welcome! I'm happy to help. Let me know if you need anything else.";
               } else {
                 // Default responses for other queries
                 const fallbackResponses = [
                   "That's an interesting question. Reinforce is designed to help with exactly that kind of challenge.",
-                  "Great question! Reinforce has several features that might help with that.",
+                  'Great question! Reinforce has several features that might help with that.',
                   "I understand what you're asking. Let me explain how Reinforce approaches this topic.",
                   "I'm still learning, but I'd be happy to assist with what I know about Reinforce.",
-                  "Reinforce is constantly evolving to better address questions like yours."
+                  'Reinforce is constantly evolving to better address questions like yours.',
                 ];
-                
-                const responseIndex = Math.floor(Math.random() * fallbackResponses.length);
+
+                const responseIndex = Math.floor(
+                  Math.random() * fallbackResponses.length
+                );
                 response = fallbackResponses[responseIndex];
               }
-              
+
               // Update the message list, replacing the tentative message
-              setState(prev => ({
+              setState((prev) => ({
                 ...prev,
-                messages: prev.messages.filter(m => !m.tentative).concat([{
-                  role: 'agent',
-                  message: response,
-                  timeInCallSecs: Date.now() / 1000
-                }])
+                messages: prev.messages
+                  .filter((m) => !m.tentative)
+                  .concat([
+                    {
+                      role: 'agent',
+                      message: response,
+                      timeInCallSecs: Date.now() / 1000,
+                    },
+                  ]),
               }));
             }, 1500);
           }, 500);
-          
+
           return;
         }
-        
+
         // Normal API mode
         if (conversation.status === 'connected') {
           try {
@@ -263,7 +306,7 @@ const VoiceAssistant = () => {
             // to work around TypeScript errors
             (conversation as any).send({
               type: 'text_message',
-              text: message
+              text: message,
             });
             console.log('Message sent successfully');
           } catch (error) {
@@ -276,22 +319,22 @@ const VoiceAssistant = () => {
         } else {
           console.warn('Cannot send message: conversation not connected');
         }
-      }
+      },
     };
   }, [conversation, useFallbackMode]);
 
   const getSignedUrl = async (): Promise<string> => {
     try {
-      const response = await fetch("/api/get-signed-url");
+      const response = await fetch('/api/get-signed-url');
       if (!response.ok) {
         throw new Error(`Failed to get signed url: ${response.statusText}`);
       }
       const data = await response.json();
-      
+
       if (!data.signedUrl) {
         throw new Error('No signed URL returned from API');
       }
-      
+
       console.log('Successfully retrieved signed URL');
       return data.signedUrl;
     } catch (error) {
@@ -302,53 +345,56 @@ const VoiceAssistant = () => {
 
   const startConversation = useCallback(async () => {
     try {
-      setState(prev => ({ ...prev, error: null, isLoading: true }));
-      
+      setState((prev) => ({ ...prev, error: null, isLoading: true }));
+
       // If we're in fallback mode, just simulate a successful connection
       if (useFallbackMode) {
         console.log('Using fallback mode for conversation');
-        
+
         // If this is the first time initializing fallback mode, add a welcome message
         if (!fallbackInitialized) {
-          setState(prev => ({ 
-            ...prev, 
+          setState((prev) => ({
+            ...prev,
             isLoading: false,
             connected: true,
             messages: [
               ...prev.messages,
               {
                 role: 'agent',
-                message: "Hello! I'm Tia, your AI assistant for Reinforce. I'm currently running in fallback mode due to API connection issues, but I'm still here to help you!",
-                timeInCallSecs: Date.now() / 1000
-              }
-            ]
+                message:
+                  "Hello! I'm Tia, your AI assistant for Reinforce. I'm currently running in fallback mode due to API connection issues, but I'm still here to help you!",
+                timeInCallSecs: Date.now() / 1000,
+              },
+            ],
           }));
           setFallbackInitialized(true);
         } else {
-          setState(prev => ({ 
-            ...prev, 
+          setState((prev) => ({
+            ...prev,
             isLoading: false,
-            connected: true
+            connected: true,
           }));
         }
         return;
       }
-      
+
       // Check for audio permissions and setup
-      const stream = await navigator.mediaDevices.getUserMedia({ 
+      const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           channelCount: 1,
           sampleRate: 16000,
           sampleSize: 16,
           echoCancellation: true,
           noiseSuppression: true,
-        } 
+        },
       });
-      
+
       // Ensure we have audio input devices
       const devices = await navigator.mediaDevices.enumerateDevices();
-      const hasAudioInput = devices.some(device => device.kind === 'audioinput');
-      
+      const hasAudioInput = devices.some(
+        (device) => device.kind === 'audioinput'
+      );
+
       if (!hasAudioInput) {
         throw new Error('No audio input devices found');
       }
@@ -356,7 +402,7 @@ const VoiceAssistant = () => {
       console.log('Getting signed URL...');
       const signedUrl = await getSignedUrl();
       console.log('Got signed URL, starting session...');
-      
+
       // Create session options with required parameters
       const sessionOptions = {
         signedUrl,
@@ -370,11 +416,11 @@ If you don't know something, admit it rather than making up information.
 The current date is ${new Date().toISOString().split('T')[0]}.
 The user's name is ${user?.name || 'there'}.
 ${user?.institution?.name ? `The user is from ${user.institution.name}.` : ''}
-`
-          }
-        ]
+`,
+          },
+        ],
       };
-      
+
       // Try to start the session with the API
       console.log('Starting conversation session...');
       try {
@@ -384,36 +430,38 @@ ${user?.institution?.name ? `The user is from ${user.institution.name}.` : ''}
         console.error('Failed to start conversation with API:', error);
         // Switch to fallback mode if API fails
         setUseFallbackMode(true);
-        setState(prev => ({ 
-          ...prev, 
+        setState((prev) => ({
+          ...prev,
           isLoading: false,
-          connected: true
+          connected: true,
         }));
         return;
       }
-      
+
       // Clean up audio stream when the session ends
-      stream.getTracks().forEach(track => {
+      stream.getTracks().forEach((track) => {
         // Add event listener to handle track ending
         track.addEventListener('ended', () => {
           console.log('Audio track ended');
         });
       });
-      
     } catch (error) {
       console.error('Failed to start conversation:', error);
-      setState(prev => ({ 
-        ...prev, 
-        error: error instanceof Error ? error.message : 'Failed to start conversation',
-        isLoading: false
+      setState((prev) => ({
+        ...prev,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to start conversation',
+        isLoading: false,
       }));
-      
+
       // Switch to fallback mode if there's an error
       setUseFallbackMode(true);
-      setState(prev => ({ 
-        ...prev, 
+      setState((prev) => ({
+        ...prev,
         isLoading: false,
-        connected: true
+        connected: true,
       }));
     }
   }, [conversation, user, useFallbackMode]);
@@ -421,13 +469,13 @@ ${user?.institution?.name ? `The user is from ${user.institution.name}.` : ''}
   const stopConversation = useCallback(() => {
     if (useFallbackMode) {
       // In fallback mode, just update the state
-      setState(prev => ({ 
-        ...prev, 
-        connected: false
+      setState((prev) => ({
+        ...prev,
+        connected: false,
       }));
       return;
     }
-    
+
     if (conversation.status === 'connected') {
       try {
         conversation.endSession();
@@ -442,27 +490,35 @@ ${user?.institution?.name ? `The user is from ${user.institution.name}.` : ''}
     <div className="relative w-full h-full bg-gradient-to-b from-black to-purple-900 overflow-hidden">
       {/* TiaChar 3D Scene with Chat Interface */}
       <div className="w-full h-full">
-        <ClientTiaCharScene 
-          isActive={conversation.status === 'connected' || useFallbackMode} 
-          intensity={conversation.status === 'connected' || useFallbackMode ? 1 : 0.5}
+        <ClientAppScene
+          isActive={conversation.status === 'connected' || useFallbackMode}
+          intensity={
+            conversation.status === 'connected' || useFallbackMode ? 1 : 0.5
+          }
           institutionId={user?.institution?.id}
           messages={state.messages}
           onSendMessage={(message) => {
             // Add the user message to the conversation
-            setState(prev => ({
+            setState((prev) => ({
               ...prev,
-              messages: [...prev.messages, {
-                role: 'user',
-                message: message.message,
-                timeInCallSecs: Date.now() / 1000
-              }]
+              messages: [
+                ...prev.messages,
+                {
+                  role: 'user',
+                  message: message.message,
+                  timeInCallSecs: Date.now() / 1000,
+                },
+              ],
             }));
-            
+
             // Send the message to the conversation API
             if (conversation.status === 'connected') {
               // Use the safe wrapper method
               conversationApi.sendMessage(message.message);
-            } else if (conversation.status === 'disconnected' || useFallbackMode) {
+            } else if (
+              conversation.status === 'disconnected' ||
+              useFallbackMode
+            ) {
               // If in fallback mode or disconnected, start the conversation
               if (useFallbackMode) {
                 // Directly use the fallback mode
@@ -479,6 +535,7 @@ ${user?.institution?.name ? `The user is from ${user.institution.name}.` : ''}
             }
           }}
           typingSpeed={50}
+          language="en"
         />
       </div>
 
@@ -493,10 +550,14 @@ ${user?.institution?.name ? `The user is from ${user.institution.name}.` : ''}
           transition={{
             scale: {
               repeat: Infinity,
-              duration: 2
-            }
+              duration: 2,
+            },
           }}
-          onClick={conversation.status === 'disconnected' ? startConversation : stopConversation}
+          onClick={
+            conversation.status === 'disconnected'
+              ? startConversation
+              : stopConversation
+          }
         >
           <div className="text-white text-2xl">
             {conversation.status === 'disconnected' && '🎤'}

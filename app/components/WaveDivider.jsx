@@ -1,10 +1,13 @@
 'use client';
 
-export default function WaveDivider({ color = '#5A1A8A', bgColor = '#ffffff', bgOpacity = 0.7 }) {
+export default function WaveDivider({
+  color = '#5A1A8A',
+  bgColor = '#ffffff',
+  bgOpacity = 0.7,
+}) {
   return (
-    <div style={{ backgroundColor: bgColor }}
-    >
-      <div 
+    <div style={{ backgroundColor: bgColor }}>
+      <div
         className="w-full h-[62px] -mb-[1px]"
         style={{
           // backgroundColor: bgColor,
@@ -15,7 +18,7 @@ export default function WaveDivider({ color = '#5A1A8A', bgColor = '#ffffff', bg
           maskRepeat: 'repeat-x',
           WebkitMaskSize: 'auto 100%',
           maskSize: 'auto 100%',
-          backgroundColor: color
+          backgroundColor: color,
         }}
       />
     </div>

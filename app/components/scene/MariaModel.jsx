@@ -17,7 +17,7 @@ export default function MariaModel({ opacity = 1 }) {
   return (
     <Sphere ref={meshRef} args={[1, 32, 32]}>
       <meshPhongMaterial
-        color="#9f7aea"  // Purple - warm and approachable
+        color="#9f7aea" // Purple - warm and approachable
         emissive="#805ad5"
         specular="#ffffff"
         shininess={50}

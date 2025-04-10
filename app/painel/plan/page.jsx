@@ -9,9 +9,9 @@ const plans = [
       'Access to Elementary School Mentor',
       '10 hours of chat per month',
       'Basic progress tracking',
-      'Email support'
+      'Email support',
     ],
-    recommended: false
+    recommended: false,
   },
   {
     name: 'Standard',
@@ -22,9 +22,9 @@ const plans = [
       'Unlimited chat hours',
       'Detailed progress tracking',
       'Priority email support',
-      'Personalized learning paths'
+      'Personalized learning paths',
     ],
-    recommended: true
+    recommended: true,
   },
   {
     name: 'Premium',
@@ -36,17 +36,19 @@ const plans = [
       'Advanced analytics and reporting',
       '24/7 priority support',
       'Personalized learning paths',
-      'Parent/Teacher dashboard access'
+      'Parent/Teacher dashboard access',
     ],
-    recommended: false
-  }
+    recommended: false,
+  },
 ];
 
 export default function PlanPage() {
   return (
     <div>
-      <h1 className="text-3xl font-semibold text-gray-800 mb-6">Subscription Plans</h1>
-      
+      <h1 className="text-3xl font-semibold text-gray-800 mb-6">
+        Subscription Plans
+      </h1>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {plans.map((plan) => (
           <div
@@ -61,9 +63,13 @@ export default function PlanPage() {
               </div>
             )}
             <div className="p-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">{plan.name}</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                {plan.name}
+              </h2>
               <div className="mb-6">
-                <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
+                <span className="text-4xl font-bold text-gray-900">
+                  {plan.price}
+                </span>
                 <span className="text-gray-600">/{plan.period}</span>
               </div>
               <ul className="space-y-4 mb-6">
@@ -110,7 +116,8 @@ export default function PlanPage() {
               Can I switch plans anytime?
             </h3>
             <p className="text-gray-600">
-              Yes, you can upgrade or downgrade your plan at any time. Changes will be reflected in your next billing cycle.
+              Yes, you can upgrade or downgrade your plan at any time. Changes
+              will be reflected in your next billing cycle.
             </p>
           </div>
           <div>

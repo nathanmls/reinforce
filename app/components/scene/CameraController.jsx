@@ -1,52 +1,103 @@
-"use client";
+'use client';
 
-import { useRef, useEffect, useState } from "react";
-import { useFrame } from "@react-three/fiber";
-import * as THREE from "three";
-import { useDebugCamera } from "@/context/CameraDebugContext";
-import useAdminCamera from "../../hooks/useAdminCamera";
+import { useRef, useEffect, useState } from 'react';
+import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
+import { useDebugCamera } from '@/context/CameraDebugContext';
+import useAdminCamera from '../../hooks/useAdminCamera';
 
 // Simplified transition states
 export const TRANSITION_STATES = {
-  IDLE: "idle",
-  TRANSITIONING: "transitioning",
-  COMPLETED: "completed",
-  FAILED: "failed",
+  IDLE: 'idle',
+  TRANSITIONING: 'transitioning',
+  COMPLETED: 'completed',
+  FAILED: 'failed',
 };
 
-// Camera state positions and rotations
-export const CAMERA_STATES = {
+// Camera state positions and rotations for desktop
+export const DESKTOP_CAMERA_STATES = {
   hero: {
     position: { x: 0, y: 2, z: 10 },
     rotation: { x: 0, y: Math.PI / 10, z: 0 },
+    target: { x: 0, y: 0, z: 0 } // Looking at origin
   },
   welcome: {
     position: { x: 4, y: -7, z: 10 },
     rotation: { x: 0, y: Math.PI / 4.5, z: 0 },
+    target: { x: 0, y: -7, z: 0 } // Looking at rainbow floor
   },
   mentor: {
     position: { x: -5, y: -7, z: 8 },
     rotation: { x: 0, y: Math.PI * -0.28, z: 0 },
+    target: { x: 0, y: -7, z: 0 } // Looking at center area
   },
   meetTia: {
     position: { x: -1.3, y: -7, z: 3 },
     rotation: { x: 0, y: Math.PI * -0.15, z: 0 },
+    target: { x: 0, y: -7, z: 0 } // Looking at Tia model
   },
   // Initial position for MeetTia section
   meetTiaInitial: {
     position: { x: -1.3, y: -7, z: 3 },
     rotation: { x: 0, y: Math.PI * -0.28, z: 0 },
+    target: { x: 0, y: -7, z: 0 } // Looking at Tia model
   },
   // Closeup position for MeetTia section (when Let's Begin is clicked)
   meetTiaClose: {
-    position: { x: 0, y: -7, z: 3 }, // Moved closer to the portal (negative z value)
+    position: { x: 0, y: -7, z: 3 }, // Moved closer to the portal
     rotation: { x: 0, y: Math.PI * -0.28, z: 0 },
+    target: { x: 0, y: -7, z: 0 } // Looking at portal
   },
   meetTiaFinal: {
     position: { x: -1.3, y: -10, z: 3 },
     rotation: { x: 0, y: Math.PI * -0.15, z: 0 },
+    target: { x: 0, y: -7, z: 0 } // Looking at final position
   },
 };
+
+// Camera state positions and rotations for mobile devices
+export const MOBILE_CAMERA_STATES = {
+  hero: {
+    position: { x: 0, y: 2, z: 14 }, // Further back to see more of the scene
+    rotation: { x: Math.PI * 0.06, y: Math.PI * 0.04, z: Math.PI * -0.02 },
+    target: { x: 0, y: 0, z: 0 } // Looking at origin
+  },
+  welcome: {
+    position: { x: 6, y: -7, z: 14 }, // Wider angle view
+    rotation: { x: 0, y: Math.PI / 7, z: 0 },
+    target: { x: 0, y: -7, z: 0 } // Looking at rainbow floor
+  },
+  mentor: {
+    position: { x: -5.5, y: -7, z: 10 }, // Further back for better viewing on small screens
+    rotation: { x: 0, y: Math.PI * -0.16, z: 0 },
+    target: { x: 0, y: -7, z: 0 } // Looking at center area
+  },
+  meetTia: {
+    position: { x: -1.3, y: -7, z: 3 }, // Adjusted for mobile viewport
+    rotation: { x: 0, y: Math.PI * -0.15, z: 0 },
+    target: { x: 0, y: -7, z: 0 } // Looking at Tia model
+  },
+  // Initial position for MeetTia section
+  meetTiaInitial: {
+    position: { x: -1.3, y: -7, z: 3 },
+    rotation: { x: 0, y: Math.PI * -0.25, z: 0 },
+    target: { x: 0, y: -7, z: 0 } // Looking at Tia model
+  },
+  // Closeup position for MeetTia section (when Let's Begin is clicked)
+  meetTiaClose: {
+    position: { x: 0, y: -7, z: 5 }, // Further back on mobile
+    rotation: { x: 0, y: Math.PI * -0.25, z: 0 },
+    target: { x: 0, y: -7, z: 0 } // Looking at portal
+  },
+  meetTiaFinal: {
+    position: { x: -1.3, y: -10, z: 3 },
+    rotation: { x: 0, y: Math.PI * -0.15, z: 0 },
+    target: { x: 0, y: -10, z: 0 } // Looking at final position
+  },
+};
+
+// Use the appropriate camera states based on device type
+export const CAMERA_STATES = DESKTOP_CAMERA_STATES;
 
 const CameraController = ({
   cameraRef,
@@ -60,15 +111,19 @@ const CameraController = ({
 }) => {
   const { setCameraState } = useDebugCamera();
   const initialCameraState = useRef(null);
+  const lastDistanceRef = useRef(0); // Reference to track last logged distance
   const [isExplorationMode, setIsExplorationMode] = useState(false);
   const [isWallTransitioned, setIsWallTransitioned] = useState(false);
   const [targetCameraPosition, setTargetCameraPosition] = useState(null);
   const [targetQuaternion, setTargetQuaternion] = useState(null);
+  const [targetLookAt, setTargetLookAt] = useState(null); // New state for camera target
   const [transitionState, setTransitionState] = useState(
     TRANSITION_STATES.IDLE
   );
   const [transitionError, setTransitionError] = useState(null);
   const [isMeetTiaCloseup, setIsMeetTiaCloseup] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [activeStates, setActiveStates] = useState(DESKTOP_CAMERA_STATES);
 
   const {
     heroProgress,
@@ -78,9 +133,27 @@ const CameraController = ({
     comingSoonProgress,
   } = scrollProgress;
 
+  // Detect mobile devices on component mount
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768; // 768px is the md breakpoint in Tailwind
+      setIsMobile(mobile);
+      setActiveStates(mobile ? MOBILE_CAMERA_STATES : DESKTOP_CAMERA_STATES);
+    };
+    
+    // Initial check
+    checkMobile();
+    
+    // Add event listener for window resize
+    window.addEventListener('resize', checkMobile);
+    
+    // Cleanup
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Optimized exploration mode handler
   const toggleExplorationMode = (e) => {
-    if (e.key.toLowerCase() === "r" && userRole === "administrator") {
+    if (e.key.toLowerCase() === 'r' && userRole === 'administrator') {
       setIsExplorationMode((prev) => {
         if (prev) {
           // Restore camera state when exiting exploration mode
@@ -117,8 +190,8 @@ const CameraController = ({
   };
 
   useEffect(() => {
-    window.addEventListener("keypress", toggleExplorationMode);
-    return () => window.removeEventListener("keypress", toggleExplorationMode);
+    window.addEventListener('keypress', toggleExplorationMode);
+    return () => window.removeEventListener('keypress', toggleExplorationMode);
   }, [userRole]);
 
   // Update camera state for debugging
@@ -159,7 +232,7 @@ const CameraController = ({
   // Monitor transition state changes
   useEffect(() => {
     if (transitionState === TRANSITION_STATES.FAILED) {
-      console.error("Transition failed:", transitionError);
+      console.error('Transition failed:', transitionError);
     }
   }, [transitionState, transitionError]);
 
@@ -182,42 +255,42 @@ const CameraController = ({
     // Only apply section transitions if not in exploration mode
     if (!isExplorationMode) {
       // Base camera state starts at hero
-      let targetPosition = { ...CAMERA_STATES.hero.position };
-      let targetRotation = { ...CAMERA_STATES.hero.rotation };
+      let targetPosition = { ...activeStates.hero.position };
+      let targetRotation = { ...activeStates.hero.rotation };
 
       // Hero to Welcome transition
       if (heroProgress > 0 && comingSoonProgress < 1) {
         targetPosition = {
           x: THREE.MathUtils.lerp(
-            CAMERA_STATES.hero.position.x,
-            CAMERA_STATES.welcome.position.x,
+            activeStates.hero.position.x,
+            activeStates.welcome.position.x,
             heroProgress
           ),
           y: THREE.MathUtils.lerp(
-            CAMERA_STATES.hero.position.y,
-            CAMERA_STATES.welcome.position.y,
+            activeStates.hero.position.y,
+            activeStates.welcome.position.y,
             heroProgress
           ),
           z: THREE.MathUtils.lerp(
-            CAMERA_STATES.hero.position.z,
-            CAMERA_STATES.welcome.position.z,
+            activeStates.hero.position.z,
+            activeStates.welcome.position.z,
             heroProgress
           ),
         };
         targetRotation = {
           x: THREE.MathUtils.lerp(
-            CAMERA_STATES.hero.rotation.x,
-            CAMERA_STATES.welcome.rotation.x,
+            activeStates.hero.rotation.x,
+            activeStates.welcome.rotation.x,
             heroProgress
           ),
           y: THREE.MathUtils.lerp(
-            CAMERA_STATES.hero.rotation.y,
-            CAMERA_STATES.welcome.rotation.y,
+            activeStates.hero.rotation.y,
+            activeStates.welcome.rotation.y,
             heroProgress
           ),
           z: THREE.MathUtils.lerp(
-            CAMERA_STATES.hero.rotation.z,
-            CAMERA_STATES.welcome.rotation.z,
+            activeStates.hero.rotation.z,
+            activeStates.welcome.rotation.z,
             heroProgress
           ),
         };
@@ -227,35 +300,35 @@ const CameraController = ({
       if (welcomeProgress > 0) {
         targetPosition = {
           x: THREE.MathUtils.lerp(
-            CAMERA_STATES.welcome.position.x,
-            CAMERA_STATES.mentor.position.x,
+            activeStates.welcome.position.x,
+            activeStates.mentor.position.x,
             welcomeProgress
           ),
           y: THREE.MathUtils.lerp(
-            CAMERA_STATES.welcome.position.y,
-            CAMERA_STATES.mentor.position.y,
+            activeStates.welcome.position.y,
+            activeStates.mentor.position.y,
             welcomeProgress
           ),
           z: THREE.MathUtils.lerp(
-            CAMERA_STATES.welcome.position.z,
-            CAMERA_STATES.mentor.position.z,
+            activeStates.welcome.position.z,
+            activeStates.mentor.position.z,
             welcomeProgress
           ),
         };
         targetRotation = {
           x: THREE.MathUtils.lerp(
-            CAMERA_STATES.welcome.rotation.x,
-            CAMERA_STATES.mentor.rotation.x,
+            activeStates.welcome.rotation.x,
+            activeStates.mentor.rotation.x,
             welcomeProgress
           ),
           y: THREE.MathUtils.lerp(
-            CAMERA_STATES.welcome.rotation.y,
-            CAMERA_STATES.mentor.rotation.y,
+            activeStates.welcome.rotation.y,
+            activeStates.mentor.rotation.y,
             welcomeProgress
           ),
           z: THREE.MathUtils.lerp(
-            CAMERA_STATES.welcome.rotation.z,
-            CAMERA_STATES.mentor.rotation.z,
+            activeStates.welcome.rotation.z,
+            activeStates.mentor.rotation.z,
             welcomeProgress
           ),
         };
@@ -265,35 +338,35 @@ const CameraController = ({
       if (mentorProgress > 0) {
         targetPosition = {
           x: THREE.MathUtils.lerp(
-            CAMERA_STATES.mentor.position.x,
-            CAMERA_STATES.meetTia.position.x,
+            activeStates.mentor.position.x,
+            activeStates.meetTia.position.x,
             mentorProgress
           ),
           y: THREE.MathUtils.lerp(
-            CAMERA_STATES.mentor.position.y,
-            CAMERA_STATES.meetTia.position.y,
+            activeStates.mentor.position.y,
+            activeStates.meetTia.position.y,
             mentorProgress
           ),
           z: THREE.MathUtils.lerp(
-            CAMERA_STATES.mentor.position.z,
-            CAMERA_STATES.meetTia.position.z,
+            activeStates.mentor.position.z,
+            activeStates.meetTia.position.z,
             mentorProgress
           ),
         };
         targetRotation = {
           x: THREE.MathUtils.lerp(
-            CAMERA_STATES.mentor.rotation.x,
-            CAMERA_STATES.meetTia.rotation.x,
+            activeStates.mentor.rotation.x,
+            activeStates.meetTia.rotation.x,
             mentorProgress
           ),
           y: THREE.MathUtils.lerp(
-            CAMERA_STATES.mentor.rotation.y,
-            CAMERA_STATES.meetTia.rotation.y,
+            activeStates.mentor.rotation.y,
+            activeStates.meetTia.rotation.y,
             mentorProgress
           ),
           z: THREE.MathUtils.lerp(
-            CAMERA_STATES.mentor.rotation.z,
-            CAMERA_STATES.meetTia.rotation.z,
+            activeStates.mentor.rotation.z,
+            activeStates.meetTia.rotation.z,
             mentorProgress
           ),
         };
@@ -303,35 +376,35 @@ const CameraController = ({
       if (meetTiaProgress > 0) {
         targetPosition = {
           x: THREE.MathUtils.lerp(
-            CAMERA_STATES.meetTia.position.x,
-            CAMERA_STATES.meetTiaFinal.position.x,
+            activeStates.meetTia.position.x,
+            activeStates.meetTiaFinal.position.x,
             meetTiaProgress
           ),
           y: THREE.MathUtils.lerp(
-            CAMERA_STATES.meetTia.position.y,
-            CAMERA_STATES.meetTiaFinal.position.y,
+            activeStates.meetTia.position.y,
+            activeStates.meetTiaFinal.position.y,
             meetTiaProgress
           ),
           z: THREE.MathUtils.lerp(
-            CAMERA_STATES.meetTia.position.z,
-            CAMERA_STATES.meetTiaFinal.position.z,
+            activeStates.meetTia.position.z,
+            activeStates.meetTiaFinal.position.z,
             meetTiaProgress
           ),
         };
         targetRotation = {
           x: THREE.MathUtils.lerp(
-            CAMERA_STATES.meetTia.rotation.x,
-            CAMERA_STATES.meetTiaFinal.rotation.x,
+            activeStates.meetTia.rotation.x,
+            activeStates.meetTiaFinal.rotation.x,
             meetTiaProgress
           ),
           y: THREE.MathUtils.lerp(
-            CAMERA_STATES.meetTia.rotation.y,
-            CAMERA_STATES.meetTiaFinal.rotation.y,
+            activeStates.meetTia.rotation.y,
+            activeStates.meetTiaFinal.rotation.y,
             meetTiaProgress
           ),
           z: THREE.MathUtils.lerp(
-            CAMERA_STATES.meetTia.rotation.z,
-            CAMERA_STATES.meetTiaFinal.rotation.z,
+            activeStates.meetTia.rotation.z,
+            activeStates.meetTiaFinal.rotation.z,
             meetTiaProgress
           ),
         };
@@ -362,7 +435,7 @@ const CameraController = ({
       targetCameraPosition &&
       transitionState === TRANSITION_STATES.TRANSITIONING
     ) {
-      console.log("Transitioning camera to:", targetCameraPosition);
+      console.log('Transitioning camera to:', targetCameraPosition);
       const currentPos = new THREE.Vector3(
         cameraRef.current.position.x,
         cameraRef.current.position.y,
@@ -389,9 +462,13 @@ const CameraController = ({
 
       // Check if we've reached the target (with a small threshold)
       const distanceToTarget = currentPos.distanceTo(targetPos);
-      console.log("Distance to target:", distanceToTarget);
+      // Only log distance when it changes significantly (reduce console spam)
+      if (Math.abs(distanceToTarget - lastDistanceRef.current) > 0.5) {
+        console.log('Distance to target:', distanceToTarget.toFixed(2));
+        lastDistanceRef.current = distanceToTarget;
+      }
       if (distanceToTarget < 0.1) {
-        console.log("Transition completed");
+        console.log('Transition completed');
         setTransitionState(TRANSITION_STATES.COMPLETED);
       }
     }
@@ -430,11 +507,11 @@ const CameraController = ({
   const transitionWallMeetTia = () => {
     try {
       if (!cameraRef.current) {
-        throw new Error("Camera reference is not available");
+        throw new Error('Camera reference is not available');
       }
 
       if (transitionState === TRANSITION_STATES.TRANSITIONING) {
-        throw new Error("Transition already in progress");
+        throw new Error('Transition already in progress');
       }
 
       setTransitionState(TRANSITION_STATES.TRANSITIONING);
@@ -463,7 +540,7 @@ const CameraController = ({
 
       // Validate target position
       if (Object.values(targetPosition).some(isNaN)) {
-        throw new Error("Invalid target position calculated");
+        throw new Error('Invalid target position calculated');
       }
 
       setTargetCameraPosition(targetPosition);
@@ -474,14 +551,14 @@ const CameraController = ({
       );
 
       if (!targetQuat.isValid()) {
-        throw new Error("Invalid target rotation calculated");
+        throw new Error('Invalid target rotation calculated');
       }
 
       setTargetQuaternion(targetQuat);
       setIsWallTransitioned(true);
       // Note: COMPLETED state will be set when animation actually reaches target
     } catch (error) {
-      console.error("Transition failed:", error);
+      console.error('Transition failed:', error);
       setTransitionError(error.message);
       setTransitionState(TRANSITION_STATES.FAILED);
       // Reset any partial transition state
@@ -503,11 +580,11 @@ const CameraController = ({
   const reverseWallMeetTiaTransition = () => {
     try {
       if (!initialCameraState.current) {
-        throw new Error("No initial camera state available");
+        throw new Error('No initial camera state available');
       }
 
       if (transitionState === TRANSITION_STATES.TRANSITIONING) {
-        throw new Error("Transition already in progress");
+        throw new Error('Transition already in progress');
       }
 
       setTransitionState(TRANSITION_STATES.TRANSITIONING);
@@ -515,7 +592,7 @@ const CameraController = ({
 
       // Validate initial state
       if (Object.values(initialCameraState.current.position).some(isNaN)) {
-        throw new Error("Invalid initial position state");
+        throw new Error('Invalid initial position state');
       }
 
       setTargetCameraPosition(initialCameraState.current.position);
@@ -529,14 +606,14 @@ const CameraController = ({
       );
 
       if (!targetQuat.isValid()) {
-        throw new Error("Invalid initial rotation state");
+        throw new Error('Invalid initial rotation state');
       }
 
       setTargetQuaternion(targetQuat);
       setIsWallTransitioned(false);
       setTransitionState(TRANSITION_STATES.IDLE);
     } catch (error) {
-      console.error("Reverse transition failed:", error);
+      console.error('Reverse transition failed:', error);
       setTransitionError(error.message);
       setTransitionState(TRANSITION_STATES.FAILED);
     }
@@ -551,10 +628,10 @@ const CameraController = ({
   const transitionToMeetTiaCloseup = () => {
     try {
       if (!cameraRef.current) {
-        throw new Error("Camera reference is not available");
+        throw new Error('Camera reference is not available');
       }
 
-      console.log("Starting transition to MeetTia closeup");
+      console.log('Starting transition to MeetTia closeup');
 
       // Force reset any ongoing transitions
       setTransitionState(TRANSITION_STATES.IDLE);
@@ -563,8 +640,8 @@ const CameraController = ({
       // Set the new transition state
       setTransitionState(TRANSITION_STATES.TRANSITIONING);
 
-      const targetPosition = CAMERA_STATES.meetTiaClose.position;
-      const targetRotation = CAMERA_STATES.meetTiaClose.rotation;
+      const targetPosition = activeStates.meetTiaClose.position;
+      const targetRotation = activeStates.meetTiaClose.rotation;
 
       setTargetCameraPosition(targetPosition);
 
@@ -577,7 +654,7 @@ const CameraController = ({
       setIsMeetTiaCloseup(true);
       if (updatePortalCloseupState) updatePortalCloseupState(true);
     } catch (error) {
-      console.error("Transition to closeup failed:", error);
+      console.error('Transition to closeup failed:', error);
       setTransitionError(error.message);
       setTransitionState(TRANSITION_STATES.FAILED);
     }
@@ -587,10 +664,10 @@ const CameraController = ({
   const transitionToMeetTiaInitial = () => {
     try {
       if (!cameraRef.current) {
-        throw new Error("Camera reference is not available");
+        throw new Error('Camera reference is not available');
       }
 
-      console.log("Starting transition to MeetTia initial position");
+      console.log('Starting transition to MeetTia initial position');
 
       // Force reset any ongoing transitions
       setTransitionState(TRANSITION_STATES.IDLE);
@@ -601,15 +678,15 @@ const CameraController = ({
 
       // Directly set camera position for immediate effect
       cameraRef.current.position.set(
-        CAMERA_STATES.meetTiaInitial.position.x,
-        CAMERA_STATES.meetTiaInitial.position.y,
-        CAMERA_STATES.meetTiaInitial.position.z
+        activeStates.meetTiaInitial.position.x,
+        activeStates.meetTiaInitial.position.y,
+        activeStates.meetTiaInitial.position.z
       );
 
       cameraRef.current.rotation.set(
-        CAMERA_STATES.meetTiaInitial.rotation.x,
-        CAMERA_STATES.meetTiaInitial.rotation.y,
-        CAMERA_STATES.meetTiaInitial.rotation.z
+        activeStates.meetTiaInitial.rotation.x,
+        activeStates.meetTiaInitial.rotation.y,
+        activeStates.meetTiaInitial.rotation.z
       );
 
       // Update states
@@ -619,9 +696,9 @@ const CameraController = ({
       // Complete the transition immediately
       setTransitionState(TRANSITION_STATES.COMPLETED);
 
-      console.log("Transition to MeetTia initial position completed");
+      console.log('Transition to MeetTia initial position completed');
     } catch (error) {
-      console.error("Transition to initial position failed:", error);
+      console.error('Transition to initial position failed:', error);
       setTransitionError(error.message);
       setTransitionState(TRANSITION_STATES.FAILED);
     }

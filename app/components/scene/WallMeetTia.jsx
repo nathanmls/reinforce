@@ -5,12 +5,12 @@ import * as THREE from 'three';
 import PropTypes from 'prop-types';
 import { useFrame } from '@react-three/fiber';
 
-export default function WallMeetTia({ 
-  width = 10, 
-  height = 8.8, 
-  holeRadius = 1, 
-  color = "#D2DBCD",
-  wireframe = false
+export default function WallMeetTia({
+  width = 10,
+  height = 8.8,
+  holeRadius = 1,
+  color = '#D2DBCD',
+  wireframe = false,
 }) {
   const shape = useMemo(() => {
     const shape = new THREE.Shape();
@@ -62,5 +62,5 @@ WallMeetTia.propTypes = {
   height: PropTypes.number,
   holeRadius: PropTypes.number,
   color: PropTypes.string,
-  wireframe: PropTypes.bool
+  wireframe: PropTypes.bool,
 };

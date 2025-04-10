@@ -4,10 +4,9 @@ import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 
 // Dynamically import the DialogChatHistory component with SSR disabled
-const DialogChatHistory = dynamic(
-  () => import('./DialogChatHistory'),
-  { ssr: false }
-);
+const DialogChatHistory = dynamic(() => import('./DialogChatHistory'), {
+  ssr: false,
+});
 
 /**
  * ClientOnlyDialogChatHistory is a wrapper component that ensures the DialogChatHistory component

@@ -9,7 +9,7 @@ const FirebaseContext = createContext({
   isInitialized: false,
   hasError: false,
   error: null,
-  isBlocked: false
+  isBlocked: false,
 });
 
 export function useFirebase() {
@@ -21,7 +21,7 @@ export function FirebaseProvider({ children }) {
     isInitialized: false,
     hasError: false,
     error: null,
-    isBlocked: false
+    isBlocked: false,
   });
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export function FirebaseProvider({ children }) {
             isInitialized: true,
             hasError: true,
             error: new Error('Firebase services failed to initialize'),
-            isBlocked: false
+            isBlocked: false,
           });
           return;
         }
@@ -45,21 +45,24 @@ export function FirebaseProvider({ children }) {
           // These errors are okay and expected in some cases
           if (err.code === 'failed-precondition') {
             // Multiple tabs open, persistence can only be enabled in one tab at a time
-            console.info('Multiple tabs open, persistence enabled in another tab');
+            console.info(
+              'Multiple tabs open, persistence enabled in another tab'
+            );
           } else if (err.code === 'unimplemented') {
             // The current browser doesn't support persistence
-            console.info('Current browser doesn\'t support persistence');
+            console.info("Current browser doesn't support persistence");
           }
         }
 
         // Set up auth state listener to confirm services are working
-        const unsubscribe = onAuthStateChanged(auth, 
+        const unsubscribe = onAuthStateChanged(
+          auth,
           () => {
             setState({
               isInitialized: true,
               hasError: false,
               error: null,
-              isBlocked: false
+              isBlocked: false,
             });
           },
           (error) => {
@@ -67,7 +70,7 @@ export function FirebaseProvider({ children }) {
               isInitialized: true,
               hasError: true,
               error,
-              isBlocked: error.code === 'auth/network-request-failed'
+              isBlocked: error.code === 'auth/network-request-failed',
             });
           }
         );
@@ -78,7 +81,9 @@ export function FirebaseProvider({ children }) {
           isInitialized: true,
           hasError: true,
           error,
-          isBlocked: error.message.includes('network') || error.message.includes('blocked')
+          isBlocked:
+            error.message.includes('network') ||
+            error.message.includes('blocked'),
         });
       }
     };

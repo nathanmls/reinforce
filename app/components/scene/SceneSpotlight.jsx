@@ -1,8 +1,8 @@
 // app/components/scene/SceneSpotlight.jsx
-"use client";
+'use client';
 
-import * as THREE from "three";
-import { useRef } from "react";
+import * as THREE from 'three';
+import { useRef } from 'react';
 
 const SceneSpotlight = ({ isExplorationMode }) => {
   const spotlightRef = useRef();

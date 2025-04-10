@@ -66,11 +66,11 @@
 
 /* Text shadow utilities */
 .text-shadow {
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .text-shadow-lg {
-  text-shadow: 0 4px 8px rgba(0,0,0,0.5);
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
 
 /* Grain effect */
@@ -79,11 +79,32 @@
   /* background-blend-mode: color-dodge; */
   background-blend-mode: multiply;
   background-repeat: repeat;
-  background-color: #F2F2F1;
+  background-color: #f2f2f1;
 }
 
 @layer utilities {
   .flex-center {
     @apply flex items-center justify-center;
   }
+  
+  /* Hide scrollbar but keep functionality */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
+}
+
+/* Global scrollbar hiding */
+html, body {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  overflow-y: auto;
+}
+
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, and Opera */
 }

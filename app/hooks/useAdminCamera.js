@@ -12,9 +12,9 @@ export default function useAdminCamera(camera, isExplorationMode, userRole) {
   const keys = useRef({});
   const rotationState = useRef({
     pitch: 0, // X rotation (up/down)
-    yaw: 0,   // Y rotation (left/right)
+    yaw: 0, // Y rotation (left/right)
   });
-  
+
   useEffect(() => {
     if (!camera) return;
 
@@ -24,7 +24,7 @@ export default function useAdminCamera(camera, isExplorationMode, userRole) {
       pitch: euler.x,
       yaw: euler.y,
     };
-    
+
     const handleKeyDown = (e) => {
       if (!e || !e.key) return;
       keys.current[e.key.toLowerCase()] = true;
@@ -47,7 +47,8 @@ export default function useAdminCamera(camera, isExplorationMode, userRole) {
   const updateCamera = useCallback(() => {
     if (!camera || userRole !== 'administrator' || !isExplorationMode) return;
 
-    const { w, a, s, d, arrowleft, arrowright, arrowup, arrowdown } = keys.current;
+    const { w, a, s, d, arrowleft, arrowright, arrowup, arrowdown } =
+      keys.current;
 
     // Update rotation state
     if (arrowleft) {
@@ -72,18 +73,22 @@ export default function useAdminCamera(camera, isExplorationMode, userRole) {
     // Apply rotations in the correct order (YXZ)
     const quaternion = new THREE.Quaternion()
       .setFromEuler(new THREE.Euler(0, rotationState.current.yaw, 0, 'YXZ'))
-      .multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(rotationState.current.pitch, 0, 0, 'YXZ')));
-    
+      .multiply(
+        new THREE.Quaternion().setFromEuler(
+          new THREE.Euler(rotationState.current.pitch, 0, 0, 'YXZ')
+        )
+      );
+
     camera.quaternion.copy(quaternion);
 
     // Calculate movement direction based on camera's rotation
     const direction = new THREE.Vector3();
-    
+
     // Forward/backward movement
     if (w || s) {
       direction.z = s ? MOVE_SPEED : -MOVE_SPEED;
     }
-    
+
     // Left/right movement
     if (a || d) {
       direction.x = d ? MOVE_SPEED : -MOVE_SPEED;

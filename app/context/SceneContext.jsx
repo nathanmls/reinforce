@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { createContext, useContext, useRef } from 'react';
 import { useCameraTransitions } from '../hooks/useCameraTransitions';
@@ -10,17 +10,19 @@ export const SceneProvider = ({ children }) => {
   const groupRef = useRef();
   const spotlightRef = useRef();
   const spotlightTargetRef = useRef();
-  
+
   const cameraTransitions = useCameraTransitions();
-  
+
   return (
-    <SceneContext.Provider value={{
-      cameraRef,
-      groupRef,
-      spotlightRef,
-      spotlightTargetRef,
-      ...cameraTransitions
-    }}>
+    <SceneContext.Provider
+      value={{
+        cameraRef,
+        groupRef,
+        spotlightRef,
+        spotlightTargetRef,
+        ...cameraTransitions,
+      }}
+    >
       {children}
     </SceneContext.Provider>
   );

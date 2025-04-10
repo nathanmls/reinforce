@@ -109,30 +109,31 @@ export default function TestimonialsSection() {
   const handleDragMove = (e) => {
     if (!isDragging) return;
     e.preventDefault();
-    
+
     const currentPosition = e.pageX || e.touches?.[0].pageX;
     const delta = dragPosition.start - currentPosition;
     const containerWidth = slideContainerRef.current?.offsetWidth || 0;
-    
+
     // Calculate the drag offset as a percentage
     const newOffset = (delta / containerWidth) * 100;
     setDragOffset(newOffset);
-    setDragPosition(prev => ({ ...prev, current: currentPosition }));
+    setDragPosition((prev) => ({ ...prev, current: currentPosition }));
   };
 
   const handleDragEnd = () => {
     if (!isDragging) return;
-    
+
     const containerWidth = slideContainerRef.current?.offsetWidth || 0;
     const threshold = 20; // percentage of slide width needed to trigger change
-    
+
     let newIndex = currentIndex;
     if (Math.abs(dragOffset) > threshold) {
-      newIndex = dragOffset > 0 
-        ? Math.min(currentIndex + 1, testimonials.length - itemsPerView)
-        : Math.max(currentIndex - 1, 0);
+      newIndex =
+        dragOffset > 0
+          ? Math.min(currentIndex + 1, testimonials.length - itemsPerView)
+          : Math.max(currentIndex - 1, 0);
     }
-    
+
     // Reset drag state
     setIsDragging(false);
     setDragOffset(0);
@@ -164,10 +165,15 @@ export default function TestimonialsSection() {
   };
 
   return (
-    <div id="testimonials" className="overflow-hidden bg-[#F2B035] h-screen items-center flex py-24 sm:py-32">
+    <div
+      id="testimonials"
+      className="overflow-hidden bg-gray-900 pointer-events-auto h-screen items-center flex py-24 sm:py-32"
+    >
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-xl text-center mb-10">
-          <h2 className="text-lg font-semibold leading-8 tracking-tight text-indigo-600">Depoimentos</h2>
+          <h2 className="text-lg font-semibold leading-8 tracking-tight text-indigo-600">
+            Depoimentos
+          </h2>
           <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             O que educadores e pais dizem
           </p>
@@ -176,7 +182,7 @@ export default function TestimonialsSection() {
           </p>
         </div>
 
-        <div 
+        <div
           className="relative mx-auto max-w-[90rem] select-none"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => {
@@ -212,7 +218,9 @@ export default function TestimonialsSection() {
                 >
                   <figure className="relative h-full rounded-2xl bg-white p-6 shadow-xl shadow-gray-900/10">
                     <blockquote className="text-gray-900">
-                      <p className="text-lg tracking-tight">"{testimonial.body}"</p>
+                      <p className="text-lg tracking-tight">
+                        "{testimonial.body}"
+                      </p>
                     </blockquote>
                     <figcaption className="mt-6 flex items-center gap-x-4">
                       <img
@@ -221,8 +229,12 @@ export default function TestimonialsSection() {
                         alt=""
                       />
                       <div>
-                        <div className="font-semibold">{testimonial.author.name}</div>
-                        <div className="text-gray-600">{testimonial.author.handle}</div>
+                        <div className="font-semibold">
+                          {testimonial.author.name}
+                        </div>
+                        <div className="text-gray-600">
+                          {testimonial.author.handle}
+                        </div>
                       </div>
                     </figcaption>
                   </figure>
@@ -230,7 +242,7 @@ export default function TestimonialsSection() {
               ))}
             </div>
           </div>
-          
+
           <div className="mt-10 flex justify-center gap-x-6">
             <button
               type="button"
@@ -241,21 +253,43 @@ export default function TestimonialsSection() {
               }}
               className="rounded-full bg-white p-2 text-gray-900 shadow-sm hover:bg-gray-100"
             >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.75 19.5L8.25 12l7.5-7.5"
+                />
               </svg>
             </button>
             <button
               type="button"
               onClick={() => {
-                setCurrentIndex(Math.min(testimonials.length - itemsPerView, currentIndex + 1));
+                setCurrentIndex(
+                  Math.min(testimonials.length - itemsPerView, currentIndex + 1)
+                );
                 setIsPaused(true);
                 setTimeout(() => setIsPaused(false), 1000);
               }}
               className="rounded-full bg-white p-2 text-gray-900 shadow-sm hover:bg-gray-100"
             >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                />
               </svg>
             </button>
           </div>

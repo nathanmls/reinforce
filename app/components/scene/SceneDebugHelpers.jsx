@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { Grid, GizmoHelper, GizmoViewport } from "@react-three/drei";
-import * as THREE from "three";
+import { Grid, GizmoHelper, GizmoViewport } from '@react-three/drei';
+import * as THREE from 'three';
 
 const SceneDebugHelpers = ({ isExplorationMode, userRole, spotlightRef }) => {
-  if (!isExplorationMode || userRole !== "administrator") {
+  if (!isExplorationMode || userRole !== 'administrator') {
     return null;
   }
 
@@ -22,7 +22,7 @@ const SceneDebugHelpers = ({ isExplorationMode, userRole, spotlightRef }) => {
       <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
         <GizmoViewport
           labelColor="white"
-          axisColors={["#ff3653", "#0adb50", "#2c8fdf"]}
+          axisColors={['#ff3653', '#0adb50', '#2c8fdf']}
         />
       </GizmoHelper>
       {spotlightRef.current && (

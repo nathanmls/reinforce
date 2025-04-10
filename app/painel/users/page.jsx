@@ -2,7 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { collection, query, getDocs, doc, updateDoc, deleteDoc, where } from 'firebase/firestore';
+import {
+  collection,
+  query,
+  getDocs,
+  doc,
+  updateDoc,
+  deleteDoc,
+  where,
+} from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { USER_ROLES } from '../../config/roles';
 import EditUserModal from './components/EditUserModal';
@@ -44,14 +52,19 @@ function UsersContent() {
         usersQuery = query(collection(db, 'users'));
       } else {
         // Managers can only see students
-        usersQuery = query(collection(db, 'users'), where('role', '==', USER_ROLES.STUDENT));
+        usersQuery = query(
+          collection(db, 'users'),
+          where('role', '==', USER_ROLES.STUDENT)
+        );
       }
 
       const querySnapshot = await getDocs(usersQuery);
-      const usersData = querySnapshot.docs.map(doc => ({
+      const usersData = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-        lastActive: doc.data().lastActive ? new Date(doc.data().lastActive).toLocaleString() : 'Never'
+        lastActive: doc.data().lastActive
+          ? new Date(doc.data().lastActive).toLocaleString()
+          : 'Never',
       }));
 
       setUsers(usersData);
@@ -74,7 +87,7 @@ function UsersContent() {
     try {
       setLoading(true);
       await deleteDoc(doc(db, 'users', userId));
-      setUsers(users.filter(u => u.id !== userId));
+      setUsers(users.filter((u) => u.id !== userId));
     } catch (err) {
       console.error('Error deleting user:', err);
       setError('Failed to delete user');
@@ -90,10 +103,12 @@ function UsersContent() {
 
       await updateDoc(doc(db, 'users', userId), {
         ...updatedData,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       });
 
-      setUsers(users.map(u => u.id === userId ? { ...u, ...updatedData } : u));
+      setUsers(
+        users.map((u) => (u.id === userId ? { ...u, ...updatedData } : u))
+      );
       setShowEditModal(false);
     } catch (err) {
       console.error('Error updating user:', err);
@@ -116,7 +131,7 @@ function UsersContent() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-semibold text-gray-800">Users</h1>
         {isAdmin && (
-          <button 
+          <button
             onClick={() => setShowAddModal(true)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
@@ -187,22 +202,32 @@ function UsersContent() {
                     <div className="text-sm text-gray-900">{user.email}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{user.role || USER_ROLES.STUDENT}</div>
+                    <div className="text-sm text-gray-900">
+                      {user.role || USER_ROLES.STUDENT}
+                    </div>
                   </td>
                   {!isAdmin && (
                     <>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{user.grade || 'Not set'}</div>
+                        <div className="text-sm text-gray-900">
+                          {user.grade || 'Not set'}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{user.preferredSubjects || 'Not set'}</div>
+                        <div className="text-sm text-gray-900">
+                          {user.preferredSubjects || 'Not set'}
+                        </div>
                       </td>
                     </>
                   )}
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      user.status === 'Inactive' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                    }`}>
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        user.status === 'Inactive'
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-green-100 text-green-800'
+                      }`}
+                    >
                       {user.status || 'Active'}
                     </span>
                   </td>
@@ -255,7 +280,9 @@ function UsersContent() {
 // Main component that wraps the content with ClientOnlyFirebase
 export default function UsersPage() {
   return (
-    <ClientOnlyFirebase fallback={<LoadingSpinner message="Loading users data..." />}>
+    <ClientOnlyFirebase
+      fallback={<LoadingSpinner message="Loading users data..." />}
+    >
       <UsersContent />
     </ClientOnlyFirebase>
   );

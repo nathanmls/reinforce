@@ -1,5 +1,5 @@
-import type { AgentState } from "@livekit/components-react";
-import { useEffect, useRef, useState } from "react";
+import type { AgentState } from '@livekit/components-react';
+import { useEffect, useRef, useState } from 'react';
 interface NoAgentNotificationProps extends React.PropsWithChildren<object> {
   state: AgentState;
 }
@@ -15,17 +15,17 @@ export function NoAgentNotification(props: NoAgentNotificationProps) {
 
   // If the agent has connected, we don't need to show the notification.
   if (
-    ["listening", "thinking", "speaking"].includes(props.state) &&
+    ['listening', 'thinking', 'speaking'].includes(props.state) &&
     agentHasConnected.current == false
   ) {
     agentHasConnected.current = true;
   }
 
   useEffect(() => {
-    if (props.state === "connecting") {
+    if (props.state === 'connecting') {
       timeoutRef.current = window.setTimeout(() => {
         if (
-          props.state === "connecting" &&
+          props.state === 'connecting' &&
           agentHasConnected.current === false
         ) {
           setShowNotification(true);

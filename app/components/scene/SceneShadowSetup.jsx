@@ -1,8 +1,8 @@
 // app/components/scene/SceneShadowSetup.jsx
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import * as THREE from "three";
+import { useEffect } from 'react';
+import * as THREE from 'three';
 
 const SceneShadowSetup = ({ gl }) => {
   useEffect(() => {

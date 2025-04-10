@@ -1,14 +1,16 @@
 import { useEffect, useRef } from 'react';
 import { useScroll } from '../context/ScrollContext';
 
-const SMOOTH_SECTIONS = ['hero', 'welcome', 'mentor', 'meet-tia', 'coming-soon'];
+const SMOOTH_SECTIONS = [
+  'hero',
+  'welcome',
+  'mentor',
+  'meet-tia',
+  'coming-soon',
+];
 
 export function useSmoothCenter(activeSection, options = {}) {
-  const {
-    threshold = 0,
-    smoothness = 'smooth',
-    debounceTime = 150
-  } = options;
+  const { threshold = 0, smoothness = 'smooth', debounceTime = 150 } = options;
 
   const { comingSoonProgress } = useScroll();
   const scrollTimeout = useRef(null);
@@ -48,7 +50,7 @@ export function useSmoothCenter(activeSection, options = {}) {
       if (offset !== 0) {
         window.scrollBy({
           top: offset,
-          behavior: smoothness
+          behavior: smoothness,
         });
       }
     };

@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
-import Link from 'next/link';
-import { translations } from '../translations';
+// import Link from 'next/link';
+import { translations } from '@/translations';
 import Header from '@/components/Header';
 
 export default function Login() {
@@ -23,15 +23,15 @@ export default function Login() {
       setError(t.auth.emailPasswordRequired);
       return;
     }
-    
+
     try {
       setError('');
       setLoading(true);
       await login(email, password);
-      
+
       // Add a small delay to ensure Firestore has time to sync
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       router.push('/painel/dashboard');
     } catch (err) {
       console.error('Login error:', err);
@@ -55,7 +55,7 @@ export default function Login() {
 
   return (
     <>
-      <Header 
+      <Header
         language={language}
         setLanguage={setLanguage}
         isLoginPage={true}
@@ -63,7 +63,9 @@ export default function Login() {
       />
       <main className="min-h-screen flex items-center justify-center bg-gray-100 pt-20">
         <div className="max-w-md w-full bg-gray-800 rounded-lg shadow-lg p-8">
-          <h2 className="text-3xl font-bold text-white mb-8 text-center">{t.nav.login}</h2>
+          <h2 className="text-3xl font-bold text-white mb-8 text-center">
+            {t.nav.login}
+          </h2>
           {error && (
             <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded-lg mb-4">
               {error}
@@ -71,7 +73,10 @@ export default function Login() {
           )}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 {t.contact.email}
               </label>
               <div className="mt-1">
@@ -89,7 +94,10 @@ export default function Login() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Password
               </label>
               <div className="mt-1">

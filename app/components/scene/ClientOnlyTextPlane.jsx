@@ -4,10 +4,7 @@ import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 
 // Dynamically import the TextPlane component with SSR disabled
-const TextPlane = dynamic(
-  () => import('./TextPlane'),
-  { ssr: false }
-);
+const TextPlane = dynamic(() => import('./TextPlane'), { ssr: false });
 
 /**
  * ClientOnlyTextPlane is a wrapper component that ensures the TextPlane component

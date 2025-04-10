@@ -1,6 +1,11 @@
 'use client';
 
-import React, { useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+import React, {
+  useRef,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+} from 'react';
 import * as THREE from 'three';
 import { useSceneSetup } from './three/scene/useSceneSetup';
 import { useModelSetup } from './three/model/useModelSetup';
@@ -31,26 +36,22 @@ const TiaScene = forwardRef(({ onTransitionComplete }, ref) => {
   const modelRotationRef = useRef({ y: 0 });
 
   // Get scene setup utilities
-  const { 
-    setupRenderer, 
-    setupCamera, 
-    setupScene, 
-    setupLighting, 
-    loadEnvironmentMap, 
-    updateEnvironment 
+  const {
+    setupRenderer,
+    setupCamera,
+    setupScene,
+    setupLighting,
+    loadEnvironmentMap,
+    updateEnvironment,
   } = useSceneSetup();
 
   // Get model setup utilities
-  const { 
-    loadModel, 
-    updateHeadRotation, 
-    updateJawRotation 
-  } = useModelSetup();
+  const { loadModel, updateHeadRotation, updateJawRotation } = useModelSetup();
 
   const createVignette = () => {
     // Create a plane geometry with a hole
     const planeGeometry = new THREE.PlaneGeometry(10, 10);
-    
+
     const vertexShader = `
       varying vec2 vUv;
       void main() {
@@ -58,7 +59,7 @@ const TiaScene = forwardRef(({ onTransitionComplete }, ref) => {
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       }
     `;
-    
+
     const fragmentShader = `
       varying vec2 vUv;
       void main() {
@@ -86,7 +87,7 @@ const TiaScene = forwardRef(({ onTransitionComplete }, ref) => {
       transparent: true,
       side: THREE.DoubleSide,
       depthTest: false, // Ensure vignette is always visible
-      depthWrite: false
+      depthWrite: false,
     });
 
     const vignette = new THREE.Mesh(planeGeometry, material);
@@ -137,7 +138,13 @@ const TiaScene = forwardRef(({ onTransitionComplete }, ref) => {
   };
 
   const animate = () => {
-    if (!sceneRef.current || !cameraRef.current || !rendererRef.current || !modelRef.current) return;
+    if (
+      !sceneRef.current ||
+      !cameraRef.current ||
+      !rendererRef.current ||
+      !modelRef.current
+    )
+      return;
 
     // Update head rotation
     if (headBoneRef.current) {
@@ -164,7 +171,13 @@ const TiaScene = forwardRef(({ onTransitionComplete }, ref) => {
   };
 
   const handleResize = () => {
-    if (!containerRef.current || !canvasRef.current || !cameraRef.current || !rendererRef.current) return;
+    if (
+      !containerRef.current ||
+      !canvasRef.current ||
+      !cameraRef.current ||
+      !rendererRef.current
+    )
+      return;
 
     const width = containerRef.current.clientWidth;
     const height = containerRef.current.clientHeight;
@@ -181,52 +194,52 @@ const TiaScene = forwardRef(({ onTransitionComplete }, ref) => {
   useImperativeHandle(ref, () => ({
     transitionVignette: () => {
       if (!vignetteRef.current || !cameraRef.current) return;
-    
+
       // Move camera closer
       gsap.to(cameraRef.current.position, {
         // x: 0,
         // y: 0.5,
         z: 2,
         duration: 1.5,
-        ease: "power2.inOut"
+        ease: 'power2.inOut',
       });
 
       // Move vignette behind
       gsap.to(vignetteRef.current.position, {
         z: 5,
         duration: 1.5,
-        ease: "power2.inOut",
+        ease: 'power2.inOut',
         onComplete: () => {
           if (onTransitionComplete) {
             onTransitionComplete(true);
           }
-        }
+        },
       });
     },
     reverseTransition: () => {
       if (!vignetteRef.current || !cameraRef.current) return;
-    
+
       // Move camera back
       gsap.to(cameraRef.current.position, {
         x: 0,
         y: 3,
         z: 5,
         duration: 1.5,
-        ease: "power2.inOut"
+        ease: 'power2.inOut',
       });
 
       // Move vignette back
       gsap.to(vignetteRef.current.position, {
         z: 1.5,
         duration: 1.5,
-        ease: "power2.inOut",
+        ease: 'power2.inOut',
         onComplete: () => {
           if (onTransitionComplete) {
             onTransitionComplete(false);
           }
-        }
+        },
       });
-    }
+    },
   }));
 
   useEffect(() => {
@@ -238,12 +251,12 @@ const TiaScene = forwardRef(({ onTransitionComplete }, ref) => {
     return () => {
       cancelAnimationFrame(animationFrameRef.current);
       window.removeEventListener('resize', handleResize);
-      
+
       // Clean up Three.js resources
       if (rendererRef.current) {
         rendererRef.current.dispose();
       }
-      
+
       if (sceneRef.current) {
         sceneRef.current.traverse((object) => {
           if (object instanceof THREE.Mesh) {

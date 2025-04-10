@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { db, auth } from '../firebase/config';
 
 /**
- * A wrapper component that ensures Firebase-dependent components 
+ * A wrapper component that ensures Firebase-dependent components
  * are only rendered on the client side and when Firebase is properly initialized.
  */
 export default function ClientOnlyFirebase({ children, fallback = null }) {
@@ -14,7 +14,7 @@ export default function ClientOnlyFirebase({ children, fallback = null }) {
   useEffect(() => {
     // Mark component as mounted
     setIsMounted(true);
-    
+
     // Check if Firebase is initialized
     if (db && auth) {
       setIsFirebaseReady(true);

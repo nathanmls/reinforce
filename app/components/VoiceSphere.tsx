@@ -36,7 +36,8 @@ export function VoiceSphere({ intensity, institutionId }: VoiceSphereProps) {
       }
 
       try {
-        const mentors = await mentorService.getMentorsByInstitution(institutionId);
+        const mentors =
+          await mentorService.getMentorsByInstitution(institutionId);
         setMentor(mentors[0]); // Use first mentor for now
       } catch (error) {
         console.error('Error loading mentor:', error);
@@ -72,7 +73,9 @@ export function VoiceSphere({ intensity, institutionId }: VoiceSphereProps) {
   }
 
   // Use the appropriate avatar component
-  const AvatarComponent = AVATAR_COMPONENTS[mentor.avatarId] || AVATAR_COMPONENTS[AVATAR_MODELS.MARIA];
+  const AvatarComponent =
+    AVATAR_COMPONENTS[mentor.avatarId] ||
+    AVATAR_COMPONENTS[AVATAR_MODELS.MARIA];
 
   return (
     <group ref={groupRef} scale={[0.5, 0.5, 0.5]}>

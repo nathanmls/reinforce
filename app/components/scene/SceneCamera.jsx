@@ -1,8 +1,8 @@
 // app/components/scene/SceneCamera.jsx
-"use client";
+'use client';
 
-import { PerspectiveCamera } from "@react-three/drei";
-import { forwardRef } from "react";
+import { PerspectiveCamera } from '@react-three/drei';
+import { forwardRef } from 'react';
 
 const SceneCamera = forwardRef(({ position = [0, 0, 5] }, ref) => {
   return (
@@ -17,6 +17,6 @@ const SceneCamera = forwardRef(({ position = [0, 0, 5] }, ref) => {
   );
 });
 
-SceneCamera.displayName = "SceneCamera";
+SceneCamera.displayName = 'SceneCamera';
 
 export default SceneCamera;

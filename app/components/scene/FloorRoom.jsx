@@ -9,9 +9,9 @@ function FloorRoom({ wireframe = false }) {
 
     // Draw outer shape with rounded corner in bottom left
     shape.moveTo(-4.5, -5); // Start at the bottom, after the rounded corner
-    shape.lineTo(5, -5);  // Bottom right
-    shape.lineTo(5, 5);   // Up right
-    shape.lineTo(-5, 5);  // Top left
+    shape.lineTo(5, -5); // Bottom right
+    shape.lineTo(5, 5); // Up right
+    shape.lineTo(-5, 5); // Top left
     shape.lineTo(-5, -4.5); // Down to the corner
     shape.quadraticCurveTo(-5, -5, -4.5, -5); // Create rounded corner
 
@@ -28,7 +28,7 @@ function FloorRoom({ wireframe = false }) {
       bevelThickness: 0.01,
       bevelSize: 0.01,
       bevelOffset: 0,
-      bevelSegments: 2
+      bevelSegments: 2,
     };
 
     return new THREE.ExtrudeGeometry(shape, extrudeSettings);

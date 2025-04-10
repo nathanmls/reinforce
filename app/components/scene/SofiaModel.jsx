@@ -17,7 +17,7 @@ export default function SofiaModel({ opacity = 1 }) {
   return (
     <Sphere ref={meshRef} args={[1, 32, 32]}>
       <meshPhongMaterial
-        color="#ed64a6"  // Pink - creative and inspiring
+        color="#ed64a6" // Pink - creative and inspiring
         emissive="#d53f8c"
         specular="#ffffff"
         shininess={50}

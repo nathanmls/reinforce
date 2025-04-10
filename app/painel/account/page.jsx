@@ -6,7 +6,12 @@ import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { deleteUser, sendPasswordResetEmail } from 'firebase/auth';
 import { db, storage } from '../../firebase/config';
 import { useRouter } from 'next/navigation';
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
+import {
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject,
+} from 'firebase/storage';
 import ProfileImage from '../../components/ProfileImage';
 import ClientOnlyFirebase from '@/components/ClientOnlyFirebase';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -31,7 +36,7 @@ function AccountContent() {
     parentEmail: '',
     assignedMentor: 'elementary',
     profileImage: '',
-    notifications: true
+    notifications: true,
   });
 
   const isStudent = userRole === 'student';
@@ -42,7 +47,7 @@ function AccountContent() {
 
       try {
         setLoading(true);
-        
+
         // Check if db is initialized
         if (!db) {
           console.error('Firestore not initialized');
@@ -50,30 +55,30 @@ function AccountContent() {
           setLoading(false);
           return;
         }
-        
+
         const userDoc = await getDoc(doc(db, 'users', user.uid));
-        
+
         if (userDoc.exists()) {
           const userData = userDoc.data();
           setFormData({
             name: userData.name || '',
             email: user.email || '',
             role: userData.role || '',
-            grade: isStudent ? (userData.grade || '') : '',
+            grade: isStudent ? userData.grade || '' : '',
             subjects: userData.subjects || [],
-            parentEmail: isStudent ? (userData.parentEmail || '') : '',
+            parentEmail: isStudent ? userData.parentEmail || '' : '',
             assignedMentor: userData.assignedMentor || 'elementary',
             profileImage: userData.profileImage || '',
-            notifications: userData.notifications ?? true
+            notifications: userData.notifications ?? true,
           });
         } else {
-          setFormData(prev => ({
+          setFormData((prev) => ({
             ...prev,
             email: user.email || '',
             name: user.displayName || '',
             grade: '',
             subjects: [],
-            parentEmail: ''
+            parentEmail: '',
           }));
         }
       } catch (err) {
@@ -89,7 +94,7 @@ function AccountContent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Students cannot edit their account
     if (isStudent) {
       return;
@@ -103,14 +108,14 @@ function AccountContent() {
     try {
       setSaveLoading(true);
       setError('');
-      
+
       // Save to Firestore
       const dataToSave = {
         name: formData.name,
         email: formData.email,
         role: formData.role,
         notifications: formData.notifications,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       // Only include student fields if user is a student
@@ -140,10 +145,12 @@ function AccountContent() {
 
       // Extract the base64 data (remove the data URL prefix)
       const base64Data = imageDataUrl.split(',')[1];
-      
+
       // Convert to Uint8Array
-      const byteArray = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-      
+      const byteArray = Uint8Array.from(atob(base64Data), (c) =>
+        c.charCodeAt(0)
+      );
+
       // Create blob with smaller chunk size
       const blob = new Blob([byteArray], { type: 'image/webp' });
 
@@ -151,16 +158,18 @@ function AccountContent() {
       const storageRef = ref(storage, `profile-images/${user.uid}.webp`);
       const metadata = {
         contentType: 'image/webp',
-        cacheControl: 'public,max-age=7200'
+        cacheControl: 'public,max-age=7200',
       };
-      
+
       // Upload with smaller chunk size
       const uploadTask = uploadBytesResumable(storageRef, blob, metadata);
 
       // Monitor upload progress
-      uploadTask.on('state_changed',
+      uploadTask.on(
+        'state_changed',
         (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           console.log('Upload is ' + progress + '% done');
         },
         (error) => {
@@ -181,15 +190,19 @@ function AccountContent() {
 
             // Update user document with new image URL
             const userRef = doc(db, 'users', user.uid);
-            await setDoc(userRef, {
-              profileImage: downloadURL,
-              updatedAt: new Date().toISOString()
-            }, { merge: true });
+            await setDoc(
+              userRef,
+              {
+                profileImage: downloadURL,
+                updatedAt: new Date().toISOString(),
+              },
+              { merge: true }
+            );
 
             // Update local state
-            setFormData(prev => ({
+            setFormData((prev) => ({
               ...prev,
-              profileImage: downloadURL
+              profileImage: downloadURL,
             }));
 
             // Update the global user profile
@@ -213,7 +226,11 @@ function AccountContent() {
   };
 
   const handleDeleteAccount = async () => {
-    if (!window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+    if (
+      !window.confirm(
+        'Are you sure you want to delete your account? This action cannot be undone.'
+      )
+    ) {
       return;
     }
 
@@ -242,13 +259,15 @@ function AccountContent() {
       router.push('/');
     } catch (err) {
       console.error('Error deleting account:', err);
-      
+
       if (err.code === 'auth/requires-recent-login') {
-        setError('For security reasons, you need to sign in again before deleting your account.');
+        setError(
+          'For security reasons, you need to sign in again before deleting your account.'
+        );
       } else {
         setError('Failed to delete account. Please try again later.');
       }
-      
+
       setDeleteLoading(false);
     }
   };
@@ -262,9 +281,9 @@ function AccountContent() {
     try {
       setResetLoading(true);
       setError('');
-      
+
       await sendPasswordResetEmail(user.auth, user.email);
-      
+
       setSuccessMessage('Password reset email sent. Check your inbox.');
       setTimeout(() => setSuccessMessage(''), 5000);
     } catch (err) {
@@ -277,10 +296,10 @@ function AccountContent() {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
@@ -294,40 +313,46 @@ function AccountContent() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-semibold text-gray-800 mb-6">Account Settings</h1>
-      
+      <h1 className="text-3xl font-semibold text-gray-800 mb-6">
+        Account Settings
+      </h1>
+
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
           {error}
         </div>
       )}
-      
+
       {successMessage && (
         <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-600 rounded-lg">
           {successMessage}
         </div>
       )}
-      
+
       <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
         <div className="p-6">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-6">
             <div className="flex-shrink-0">
-              <ProfileImage 
-                src={formData.profileImage} 
-                alt={formData.name} 
-                size={96} 
+              <ProfileImage
+                src={formData.profileImage}
+                alt={formData.name}
+                size={96}
                 onImageUpload={handleImageUpload}
                 editable={!isStudent}
                 loading={saveLoading}
               />
             </div>
             <div>
-              <h2 className="text-2xl font-semibold text-gray-800">{formData.name}</h2>
+              <h2 className="text-2xl font-semibold text-gray-800">
+                {formData.name}
+              </h2>
               <p className="text-gray-600">{formData.email}</p>
-              <p className="text-sm text-gray-500 mt-1 capitalize">{formData.role}</p>
+              <p className="text-sm text-gray-500 mt-1 capitalize">
+                {formData.role}
+              </p>
             </div>
           </div>
-          
+
           <form onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div>
@@ -343,7 +368,7 @@ function AccountContent() {
                   className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email Address
@@ -356,10 +381,11 @@ function AccountContent() {
                   className="w-full px-4 py-2 border rounded-lg bg-gray-100 text-gray-500"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Email cannot be changed directly. Please contact support for assistance.
+                  Email cannot be changed directly. Please contact support for
+                  assistance.
                 </p>
               </div>
-              
+
               {isStudent && (
                 <>
                   <div>
@@ -374,7 +400,7 @@ function AccountContent() {
                       className="w-full px-4 py-2 border rounded-lg bg-gray-100 text-gray-500"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Parent Email
@@ -389,7 +415,7 @@ function AccountContent() {
                   </div>
                 </>
               )}
-              
+
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -400,12 +426,15 @@ function AccountContent() {
                   disabled={!isEditing || isStudent}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <label htmlFor="notifications" className="ml-2 block text-sm text-gray-700">
+                <label
+                  htmlFor="notifications"
+                  className="ml-2 block text-sm text-gray-700"
+                >
                   Receive email notifications
                 </label>
               </div>
             </div>
-            
+
             <div className="mt-6 flex flex-wrap gap-4">
               {!isStudent && (
                 <button
@@ -417,10 +446,14 @@ function AccountContent() {
                       : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                   } transition-colors`}
                 >
-                  {saveLoading ? 'Saving...' : isEditing ? 'Save Changes' : 'Edit Profile'}
+                  {saveLoading
+                    ? 'Saving...'
+                    : isEditing
+                      ? 'Save Changes'
+                      : 'Edit Profile'}
                 </button>
               )}
-              
+
               {isEditing && !isStudent && (
                 <button
                   type="button"
@@ -434,11 +467,11 @@ function AccountContent() {
           </form>
         </div>
       </div>
-      
+
       <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
         <div className="p-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Security</h2>
-          
+
           <div className="space-y-4">
             <div>
               <button
@@ -452,7 +485,7 @@ function AccountContent() {
                 We'll send a password reset link to your email address.
               </p>
             </div>
-            
+
             <div>
               <button
                 onClick={handleDeleteAccount}
@@ -462,7 +495,8 @@ function AccountContent() {
                 {deleteLoading ? 'Deleting...' : 'Delete Account'}
               </button>
               <p className="text-sm text-gray-500 mt-1">
-                This action cannot be undone. All your data will be permanently deleted.
+                This action cannot be undone. All your data will be permanently
+                deleted.
               </p>
             </div>
           </div>
@@ -475,7 +509,9 @@ function AccountContent() {
 // Main component that wraps the content with ClientOnlyFirebase
 export default function AccountPage() {
   return (
-    <ClientOnlyFirebase fallback={<LoadingSpinner message="Loading account data..." />}>
+    <ClientOnlyFirebase
+      fallback={<LoadingSpinner message="Loading account data..." />}
+    >
       <AccountContent />
     </ClientOnlyFirebase>
   );

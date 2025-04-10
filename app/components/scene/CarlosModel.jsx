@@ -17,7 +17,7 @@ export default function CarlosModel({ opacity = 1 }) {
   return (
     <Sphere ref={meshRef} args={[1, 32, 32]}>
       <meshPhongMaterial
-        color="#4299e1"  // Blue - analytical and trustworthy
+        color="#4299e1" // Blue - analytical and trustworthy
         emissive="#3182ce"
         specular="#ffffff"
         shininess={50}

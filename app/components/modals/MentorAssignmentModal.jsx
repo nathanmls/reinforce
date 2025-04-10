@@ -5,7 +5,12 @@ import { Dialog, Transition } from '@headlessui/react';
 import { mentorService } from '../../services/mentorService';
 import { AVATAR_MODELS } from '../../models/Mentor';
 
-export default function MentorAssignmentModal({ isOpen, onClose, institutionId, onUpdate }) {
+export default function MentorAssignmentModal({
+  isOpen,
+  onClose,
+  institutionId,
+  onUpdate,
+}) {
   const [mentors, setMentors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [assignedMentors, setAssignedMentors] = useState([]);
@@ -23,7 +28,7 @@ export default function MentorAssignmentModal({ isOpen, onClose, institutionId, 
       setLoading(true);
       const [allMentors, institutionMentors] = await Promise.all([
         mentorService.getAllMentors(),
-        mentorService.getMentorsByInstitution(institutionId)
+        mentorService.getMentorsByInstitution(institutionId),
       ]);
       setMentors(allMentors);
       setAssignedMentors(institutionMentors);
@@ -38,9 +43,15 @@ export default function MentorAssignmentModal({ isOpen, onClose, institutionId, 
     if (!selectedMentorId) return;
 
     try {
-      await mentorService.assignMentorToInstitution(selectedMentorId, institutionId);
+      await mentorService.assignMentorToInstitution(
+        selectedMentorId,
+        institutionId
+      );
       if (selectedAvatarId) {
-        await mentorService.updateMentorAvatar(selectedMentorId, selectedAvatarId);
+        await mentorService.updateMentorAvatar(
+          selectedMentorId,
+          selectedAvatarId
+        );
       }
       await loadData();
       onUpdate?.();
@@ -96,7 +107,10 @@ export default function MentorAssignmentModal({ isOpen, onClose, institutionId, 
               leaveTo="opacity-0 scale-95"
             >
               <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
+                <Dialog.Title
+                  as="h3"
+                  className="text-lg font-medium leading-6 text-gray-900"
+                >
                   Manage Institution Mentors
                 </Dialog.Title>
 
@@ -105,7 +119,9 @@ export default function MentorAssignmentModal({ isOpen, onClose, institutionId, 
                 ) : (
                   <>
                     <div className="mt-4">
-                      <h4 className="text-sm font-medium text-gray-900">Assign New Mentor</h4>
+                      <h4 className="text-sm font-medium text-gray-900">
+                        Assign New Mentor
+                      </h4>
                       <div className="mt-2 grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700">
@@ -113,14 +129,18 @@ export default function MentorAssignmentModal({ isOpen, onClose, institutionId, 
                           </label>
                           <select
                             value={selectedMentorId}
-                            onChange={(e) => setSelectedMentorId(e.target.value)}
+                            onChange={(e) =>
+                              setSelectedMentorId(e.target.value)
+                            }
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                           >
                             <option value="">Select a mentor...</option>
                             {mentors
                               .filter(
                                 (mentor) =>
-                                  !assignedMentors.some((assigned) => assigned.id === mentor.id)
+                                  !assignedMentors.some(
+                                    (assigned) => assigned.id === mentor.id
+                                  )
                               )
                               .map((mentor) => (
                                 <option key={mentor.id} value={mentor.id}>
@@ -135,14 +155,18 @@ export default function MentorAssignmentModal({ isOpen, onClose, institutionId, 
                           </label>
                           <select
                             value={selectedAvatarId}
-                            onChange={(e) => setSelectedAvatarId(e.target.value)}
+                            onChange={(e) =>
+                              setSelectedAvatarId(e.target.value)
+                            }
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                           >
-                            {Object.entries(AVATAR_MODELS).map(([key, value]) => (
-                              <option key={value} value={value}>
-                                {key}
-                              </option>
-                            ))}
+                            {Object.entries(AVATAR_MODELS).map(
+                              ([key, value]) => (
+                                <option key={value} value={value}>
+                                  {key}
+                                </option>
+                              )
+                            )}
                           </select>
                         </div>
                       </div>
@@ -157,7 +181,9 @@ export default function MentorAssignmentModal({ isOpen, onClose, institutionId, 
                     </div>
 
                     <div className="mt-6">
-                      <h4 className="text-sm font-medium text-gray-900">Assigned Mentors</h4>
+                      <h4 className="text-sm font-medium text-gray-900">
+                        Assigned Mentors
+                      </h4>
                       <div className="mt-2 space-y-4">
                         {assignedMentors.map((mentor) => (
                           <div
@@ -166,19 +192,25 @@ export default function MentorAssignmentModal({ isOpen, onClose, institutionId, 
                           >
                             <div>
                               <p className="font-medium">{mentor.name}</p>
-                              <p className="text-sm text-gray-500">{mentor.email}</p>
+                              <p className="text-sm text-gray-500">
+                                {mentor.email}
+                              </p>
                             </div>
                             <div className="flex items-center space-x-4">
                               <select
                                 value={mentor.avatarId}
-                                onChange={(e) => handleUpdateAvatar(mentor.id, e.target.value)}
+                                onChange={(e) =>
+                                  handleUpdateAvatar(mentor.id, e.target.value)
+                                }
                                 className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                               >
-                                {Object.entries(AVATAR_MODELS).map(([key, value]) => (
-                                  <option key={value} value={value}>
-                                    {key}
-                                  </option>
-                                ))}
+                                {Object.entries(AVATAR_MODELS).map(
+                                  ([key, value]) => (
+                                    <option key={value} value={value}>
+                                      {key}
+                                    </option>
+                                  )
+                                )}
                               </select>
                               <button
                                 onClick={() => handleRemoveMentor(mentor.id)}
@@ -190,7 +222,9 @@ export default function MentorAssignmentModal({ isOpen, onClose, institutionId, 
                           </div>
                         ))}
                         {assignedMentors.length === 0 && (
-                          <p className="text-sm text-gray-500">No mentors assigned yet</p>
+                          <p className="text-sm text-gray-500">
+                            No mentors assigned yet
+                          </p>
                         )}
                       </div>
                     </div>

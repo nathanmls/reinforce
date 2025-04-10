@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { forwardRef, useImperativeHandle } from "react";
-import { SceneProvider, useScene } from "@/context/SceneContext";
-import SceneComposition from "./scene/SceneComposition";
+import { forwardRef, useImperativeHandle } from 'react';
+import { SceneProvider, useScene } from '@/context/SceneContext';
+import SceneComposition from './scene/SceneComposition';
 import { TRANSITION_STATES } from './scene/CameraController';
 
 const HomeMainSceneInner = forwardRef((props, ref) => {
@@ -12,7 +12,7 @@ const HomeMainSceneInner = forwardRef((props, ref) => {
     getTransitionState,
     transitionToMeetTiaCloseup,
     transitionToMeetTiaInitial,
-    isMeetTiaCloseup
+    isMeetTiaCloseup,
   } = useScene();
 
   // Expose transition methods through ref
@@ -47,16 +47,22 @@ const HomeMainSceneInner = forwardRef((props, ref) => {
         }
       },
       // Expose the closeup state
-      isMeetTiaCloseup: isMeetTiaCloseup
+      isMeetTiaCloseup: isMeetTiaCloseup,
     }),
-    [transitionWallMeetTia, reverseWallMeetTiaTransition, getTransitionState, 
-     transitionToMeetTiaCloseup, transitionToMeetTiaInitial, isMeetTiaCloseup]
+    [
+      transitionWallMeetTia,
+      reverseWallMeetTiaTransition,
+      getTransitionState,
+      transitionToMeetTiaCloseup,
+      transitionToMeetTiaInitial,
+      isMeetTiaCloseup,
+    ]
   );
 
   return <SceneComposition />;
 });
 
-HomeMainSceneInner.displayName = "HomeMainSceneInner";
+HomeMainSceneInner.displayName = 'HomeMainSceneInner';
 
 // Wrapper component that provides the SceneContext
 const HomeMainScene = ({ sceneRef, ...props }) => {
@@ -67,6 +73,6 @@ const HomeMainScene = ({ sceneRef, ...props }) => {
   );
 };
 
-HomeMainScene.displayName = "HomeMainScene";
+HomeMainScene.displayName = 'HomeMainScene';
 
 export default HomeMainScene;

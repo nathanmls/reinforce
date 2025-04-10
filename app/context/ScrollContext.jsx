@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from 'react';
 
 const ScrollContext = createContext({
   scrollProgress: 0,
@@ -34,11 +34,11 @@ export function ScrollProvider({ children }) {
       const scrollProgress = Math.min(scrollTop / documentHeight, 1);
 
       // Get section elements
-      const heroSection = document.getElementById("hero");
-      const welcomeSection = document.getElementById("welcome");
-      const mentorSection = document.getElementById("mentor");
-      const meetTiaSection = document.getElementById("meet-tia");
-      const comingSoonSection = document.getElementById("coming-soon");
+      const heroSection = document.getElementById('hero');
+      const welcomeSection = document.getElementById('welcome');
+      const mentorSection = document.getElementById('mentor');
+      const meetTiaSection = document.getElementById('meet-tia');
+      const comingSoonSection = document.getElementById('coming-soon');
 
       // Calculate section-specific progress
       const heroProgress = calculateSectionProgress(
@@ -104,10 +104,10 @@ export function ScrollProvider({ children }) {
       return Math.max(0, Math.min(1, progress));
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll);
     handleScroll(); // Initial calculation
 
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (

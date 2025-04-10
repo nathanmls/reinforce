@@ -5,14 +5,14 @@ import PropTypes from 'prop-types';
 import * as THREE from 'three';
 import { useThree, useFrame } from '@react-three/fiber';
 
-export default function SceneLighting({ 
+export default function SceneLighting({
   ambientIntensity = 1.2,
   directionalIntensity = 1.5,
   pointIntensity = 10,
   spotIntensity = 30,
   showHelpers = false,
   groupRef,
-  isMeetTiaSection = false
+  isMeetTiaSection = false,
 }) {
   const directionalLightRef = useRef();
   const cameraLightRef = useRef();
@@ -33,7 +33,7 @@ export default function SceneLighting({
 
     // Always use main camera position for lights
     const cameraToUse = showHelpers ? mainCameraRef.current : camera;
-    
+
     // Get camera direction and position
     const cameraDirection = new THREE.Vector3();
     cameraToUse.getWorldDirection(cameraDirection);
@@ -44,7 +44,7 @@ export default function SceneLighting({
       const lightPosition = cameraPosition.clone();
       lightPosition.add(cameraDirection.multiplyScalar(-2));
       lightPosition.y += 2;
-      
+
       cameraLightRef.current.position.copy(lightPosition);
       cameraLightRef.current.target.position.copy(cameraPosition);
       cameraLightRef.current.target.updateMatrixWorld();
@@ -58,12 +58,12 @@ export default function SceneLighting({
     if (spotLightRef.current && groupRef?.current) {
       const groupPosition = new THREE.Vector3();
       groupRef.current.getWorldPosition(groupPosition);
-      
+
       // Position the light above and behind the group
-      const spotOffset = new THREE.Vector3(0, 10, 5); 
+      const spotOffset = new THREE.Vector3(0, 10, 5);
       const spotPosition = groupPosition.clone().add(spotOffset);
       spotLightRef.current.position.copy(spotPosition);
-      
+
       // Target the group position
       spotLightRef.current.target.position.copy(groupPosition);
       spotLightRef.current.target.updateMatrixWorld();
@@ -88,7 +88,9 @@ export default function SceneLighting({
 
       // Update point light
       if (pointLightRef.current) {
-        const pointPosition = isMeetTiaSection ? cameraPosition : groupPosition.clone().add(new THREE.Vector3(-5, 5, 0));
+        const pointPosition = isMeetTiaSection
+          ? cameraPosition
+          : groupPosition.clone().add(new THREE.Vector3(-5, 5, 0));
         pointLightRef.current.position.copy(pointPosition);
       }
     }
@@ -99,20 +101,35 @@ export default function SceneLighting({
     if (showHelpers) {
       // Create helpers
       if (directionalLightRef.current) {
-        const dirHelper = new THREE.DirectionalLightHelper(directionalLightRef.current, 5, '#ff0000');
+        const dirHelper = new THREE.DirectionalLightHelper(
+          directionalLightRef.current,
+          5,
+          '#ff0000'
+        );
         scene.add(dirHelper);
       }
       if (cameraLightRef.current) {
-        const camLightHelper = new THREE.DirectionalLightHelper(cameraLightRef.current, 5, '#ff00ff');
+        const camLightHelper = new THREE.DirectionalLightHelper(
+          cameraLightRef.current,
+          5,
+          '#ff00ff'
+        );
         scene.add(camLightHelper);
         cameraLightHelperRef.current = camLightHelper;
       }
       if (pointLightRef.current) {
-        const pointHelper = new THREE.PointLightHelper(pointLightRef.current, 1, '#00ff00');
+        const pointHelper = new THREE.PointLightHelper(
+          pointLightRef.current,
+          1,
+          '#00ff00'
+        );
         scene.add(pointHelper);
       }
       if (spotLightRef.current) {
-        const spotHelper = new THREE.SpotLightHelper(spotLightRef.current, '#0000ff');
+        const spotHelper = new THREE.SpotLightHelper(
+          spotLightRef.current,
+          '#0000ff'
+        );
         scene.add(spotHelper);
         spotLightHelperRef.current = spotHelper;
       }
@@ -121,7 +138,10 @@ export default function SceneLighting({
       const mainCameraHelper = new THREE.Object3D();
       // Add a small cone to represent camera direction
       const coneGeometry = new THREE.ConeGeometry(0.5, 1, 8);
-      const coneMaterial = new THREE.MeshBasicMaterial({ color: '#ffff00', wireframe: true });
+      const coneMaterial = new THREE.MeshBasicMaterial({
+        color: '#ffff00',
+        wireframe: true,
+      });
       const cone = new THREE.Mesh(coneGeometry, coneMaterial);
       cone.rotation.x = Math.PI / 2;
       mainCameraHelper.add(cone);
@@ -130,10 +150,11 @@ export default function SceneLighting({
 
       // Cleanup function
       return () => {
-        scene.children = scene.children.filter(child => 
-          !(child instanceof THREE.DirectionalLightHelper) &&
-          !(child instanceof THREE.PointLightHelper) &&
-          !(child instanceof THREE.SpotLightHelper)
+        scene.children = scene.children.filter(
+          (child) =>
+            !(child instanceof THREE.DirectionalLightHelper) &&
+            !(child instanceof THREE.PointLightHelper) &&
+            !(child instanceof THREE.SpotLightHelper)
         );
         scene.remove(mainCameraRef.current);
         cameraLightHelperRef.current = null;
@@ -145,11 +166,8 @@ export default function SceneLighting({
   return (
     <>
       {/* Ambient light for base illumination */}
-      <ambientLight 
-        intensity={ambientIntensity} 
-        color="#ffffff"
-      />
-      
+      <ambientLight intensity={ambientIntensity} color="#ffffff" />
+
       {/* Directional light for general shadows */}
       <directionalLight
         ref={directionalLightRef}
@@ -168,11 +186,7 @@ export default function SceneLighting({
       </directionalLight>
 
       {/* Hemisphere light for subtle color variation */}
-      <hemisphereLight
-        intensity={0.2}
-        color="#ffffff"
-        groundColor="#000000"
-      />
+      <hemisphereLight intensity={0.2} color="#ffffff" groundColor="#000000" />
 
       {/* Camera-following fill light */}
       <directionalLight
@@ -245,5 +259,5 @@ SceneLighting.propTypes = {
   spotIntensity: PropTypes.number,
   showHelpers: PropTypes.bool,
   groupRef: PropTypes.object,
-  isMeetTiaSection: PropTypes.bool
+  isMeetTiaSection: PropTypes.bool,
 };

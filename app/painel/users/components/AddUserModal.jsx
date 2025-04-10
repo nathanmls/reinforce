@@ -18,7 +18,7 @@ export default function AddUserModal({ onClose, onAdd }) {
     preferredSubjects: '',
     parentEmail: '',
     status: 'Active',
-    assignedMentor: 'elementary' // Default mentor
+    assignedMentor: 'elementary', // Default mentor
   });
 
   const handleSubmit = async (e) => {
@@ -48,9 +48,10 @@ export default function AddUserModal({ onClose, onAdd }) {
         preferredSubjects: formData.preferredSubjects,
         parentEmail: formData.parentEmail,
         status: formData.status,
-        assignedMentor: formData.role === USER_ROLES.STUDENT ? formData.assignedMentor : null,
+        assignedMentor:
+          formData.role === USER_ROLES.STUDENT ? formData.assignedMentor : null,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       await setDoc(doc(db, 'users', userCredential.user.uid), userData);
@@ -69,7 +70,9 @@ export default function AddUserModal({ onClose, onAdd }) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg max-w-md w-full">
         <div className="p-6">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-6">Add New User</h2>
+          <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+            Add New User
+          </h2>
 
           {error && (
             <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
@@ -85,7 +88,9 @@ export default function AddUserModal({ onClose, onAdd }) {
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
                 required
               />
@@ -98,7 +103,9 @@ export default function AddUserModal({ onClose, onAdd }) {
               <input
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
                 required
               />
@@ -111,7 +118,9 @@ export default function AddUserModal({ onClose, onAdd }) {
               <input
                 type="password"
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
                 className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
                 required
               />
@@ -123,7 +132,9 @@ export default function AddUserModal({ onClose, onAdd }) {
               </label>
               <select
                 value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, role: e.target.value })
+                }
                 className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value={USER_ROLES.STUDENT}>Student</option>
@@ -141,7 +152,9 @@ export default function AddUserModal({ onClose, onAdd }) {
                   <input
                     type="text"
                     value={formData.grade}
-                    onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, grade: e.target.value })
+                    }
                     className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -154,7 +167,10 @@ export default function AddUserModal({ onClose, onAdd }) {
                     type="text"
                     value={formData.preferredSubjects}
                     onChange={(e) =>
-                      setFormData({ ...formData, preferredSubjects: e.target.value })
+                      setFormData({
+                        ...formData,
+                        preferredSubjects: e.target.value,
+                      })
                     }
                     className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
                     placeholder="e.g., Math, Science, History"
@@ -181,7 +197,12 @@ export default function AddUserModal({ onClose, onAdd }) {
                   </label>
                   <select
                     value={formData.assignedMentor}
-                    onChange={(e) => setFormData({ ...formData, assignedMentor: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        assignedMentor: e.target.value,
+                      })
+                    }
                     className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="elementary">Elementary School Mentor</option>

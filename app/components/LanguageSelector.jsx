@@ -5,26 +5,26 @@ import Image from 'next/image';
 import { detectUserLanguage } from '../utils/geolocation';
 
 const languages = {
-  en: { 
+  en: {
     flag: '/images/flags/uk-circle.svg',
     name: 'English',
-    emoji: '🇬🇧'
+    emoji: '🇬🇧',
   },
-  pt: { 
+  pt: {
     flag: '/images/flags/br-circle.svg',
     name: 'Portuguese',
-    emoji: '🇧🇷'
+    emoji: '🇧🇷',
   },
-  es: { 
+  es: {
     flag: '/images/flags/es-circle.svg',
     name: 'Spanish',
-    emoji: '🇪🇸'
+    emoji: '🇪🇸',
   },
-  nl: { 
+  nl: {
     flag: '/images/flags/nl-circle.svg',
     name: 'Dutch',
-    emoji: '🇳🇱'
-  }
+    emoji: '🇳🇱',
+  },
 };
 
 export default function LanguageSelector({ value, onChange, onHoverChange }) {
@@ -34,7 +34,8 @@ export default function LanguageSelector({ value, onChange, onHoverChange }) {
   // Initialize language based on geolocation
   useEffect(() => {
     async function initLanguage() {
-      if (!value) { // Only detect if no language is set
+      if (!value) {
+        // Only detect if no language is set
         const detectedLang = await detectUserLanguage();
         onChange(detectedLang);
       }
@@ -71,8 +72,8 @@ export default function LanguageSelector({ value, onChange, onHoverChange }) {
   };
 
   return (
-    <div 
-      className="relative" 
+    <div
+      className="relative"
       ref={dropdownRef}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -94,11 +95,13 @@ export default function LanguageSelector({ value, onChange, onHoverChange }) {
           />
         </div>
       </button>
-      
+
       {isOpen && (
-        <div className="absolute right-0 mt-2 py-1 w-48 bg-white/95 backdrop-blur-sm 
+        <div
+          className="absolute right-0 mt-2 py-1 w-48 bg-white/95 backdrop-blur-sm 
                       rounded-xl shadow-xl ring-1 ring-black/5 z-50 transform opacity-100 
-                      scale-100 transition-all duration-200 ease-in-out">
+                      scale-100 transition-all duration-200 ease-in-out"
+        >
           {Object.entries(languages).map(([code, { flag, name }]) => (
             <button
               key={code}

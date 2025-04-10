@@ -1,13 +1,13 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { 
+import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
   createUserWithEmailAndPassword,
   browserLocalPersistence,
-  setPersistence
+  setPersistence,
 } from 'firebase/auth';
 import { auth, db } from '../firebase/config';
 import { doc, getDoc, setDoc, collection } from 'firebase/firestore';
@@ -35,18 +35,18 @@ export function AuthProvider({ children }) {
         console.warn('Firestore not available or not in browser environment');
         return;
       }
-      
+
       // Create a reference to the users collection
       const usersCollection = collection(db, 'users');
       if (!usersCollection) {
         console.error('Failed to get users collection reference');
         return;
       }
-      
+
       // Get the user document
       const userDoc = await getDoc(doc(usersCollection, uid));
       const userData = userDoc.data();
-      
+
       if (userData) {
         setUserProfile(userData);
         setUserRole(userData.role || USER_ROLES.STUDENT);
@@ -64,27 +64,27 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     // Don't run this effect on the server
     if (!isBrowser) return;
-    
+
     // Don't run this effect if Firebase auth is not available
     if (!auth) {
       console.warn('Firebase auth not initialized');
       setLoading(false);
       return;
     }
-    
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
         if (user) {
           console.log('Auth state changed - User found:', user.uid);
           setUser(user);
-          
+
           // Only try to update the user profile if Firestore is available
           if (db) {
             await updateUserProfile(user.uid);
           } else {
             console.warn('Firestore not initialized, skipping profile update');
           }
-          
+
           setError(null);
         } else {
           console.log('Auth state changed - No user');
@@ -111,10 +111,10 @@ export function AuthProvider({ children }) {
       if (!isBrowser || !auth) {
         throw new Error('Firebase auth not available');
       }
-      
+
       setError(null);
       setLoading(true);
-      
+
       // Set persistence before signing in
       await setPersistence(auth, browserLocalPersistence);
       const result = await signInWithEmailAndPassword(auth, email, password);
@@ -133,27 +133,33 @@ export function AuthProvider({ children }) {
       if (!isBrowser || !auth) {
         throw new Error('Firebase auth not available');
       }
-      
+
       setError(null);
       setLoading(true);
-      
+
       // Set persistence before signing up
       await setPersistence(auth, browserLocalPersistence);
-      
-      const result = await createUserWithEmailAndPassword(auth, email, password);
-      
+
+      const result = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
       // Create user document in Firestore
       if (db) {
         await setDoc(doc(db, 'users', result.user.uid), {
           email: result.user.email,
           role: USER_ROLES.STUDENT,
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         });
       } else {
-        console.warn('Firestore not initialized, skipping user document creation');
+        console.warn(
+          'Firestore not initialized, skipping user document creation'
+        );
       }
-      
+
       setUserRole(USER_ROLES.STUDENT);
       await updateUserProfile(result.user.uid);
       return result;
@@ -182,22 +188,24 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      userRole,
-      userProfile,
-      loading,
-      error,
-      updateUserProfile,
-      login,
-      signup,
-      logout,
-      isAdmin: userRole === USER_ROLES.ADMINISTRATOR,
-      isManager: userRole === USER_ROLES.MANAGER,
-      isStudent: userRole === USER_ROLES.STUDENT,
-      initialized
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        userRole,
+        userProfile,
+        loading,
+        error,
+        updateUserProfile,
+        login,
+        signup,
+        logout,
+        isAdmin: userRole === USER_ROLES.ADMINISTRATOR,
+        isManager: userRole === USER_ROLES.MANAGER,
+        isStudent: userRole === USER_ROLES.STUDENT,
+        initialized,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
-};
+}

@@ -16,14 +16,21 @@ const AVATAR_COMPONENTS = {
   [AVATAR_MODELS.ADVISOR]: AdvisorModel,
 };
 
-export default function MentorAvatar({ institutionId, position, rotation, scale, opacity }) {
+export default function MentorAvatar({
+  institutionId,
+  position,
+  rotation,
+  scale,
+  opacity,
+}) {
   const [mentor, setMentor] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadMentor = async () => {
       try {
-        const mentors = await mentorService.getMentorsByInstitution(institutionId);
+        const mentors =
+          await mentorService.getMentorsByInstitution(institutionId);
         // Use the first mentor for now - you could implement logic to cycle through multiple mentors
         setMentor(mentors[0]);
       } catch (error) {

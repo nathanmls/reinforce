@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
-import { useGLTF } from "@react-three/drei";
+import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import PropTypes from 'prop-types';
 
@@ -25,7 +25,7 @@ export default function BoyModel({ wireframe = false }) {
           child.material.shadowSide = THREE.DoubleSide;
           child.material.wireframe = wireframe;
           child.material.needsUpdate = true;
-          
+
           // Enhance material properties
           child.material.roughness = 0.8;
           child.material.metalness = 0.2;
@@ -48,7 +48,7 @@ export default function BoyModel({ wireframe = false }) {
 }
 
 BoyModel.propTypes = {
-  wireframe: PropTypes.bool
+  wireframe: PropTypes.bool,
 };
 
 useGLTF.preload('/models/FriendChar.glb');

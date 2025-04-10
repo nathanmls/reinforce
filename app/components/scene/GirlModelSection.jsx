@@ -1,13 +1,14 @@
-"use client";
+'use client';
 
-import { animated } from "@react-spring/three";
-import { useRef, useState, useEffect } from "react";
-import * as THREE from "three";
-import { useFrame } from "@react-three/fiber";
-import { useGLTF } from "@react-three/drei";
-import GirlModel from "./GirlModel";
-import { useScroll } from "/app/context/ScrollContext";
-import useSceneAnimationSprings from "./SceneAnimationSprings";
+import { animated, useSpring } from '@react-spring/three';
+import { useRef, useState, useEffect } from 'react';
+import * as THREE from 'three';
+import { useFrame } from '@react-three/fiber';
+import { useGLTF } from '@react-three/drei';
+import PropTypes from 'prop-types'; // Import PropTypes
+import GirlModel from './GirlModel';
+import { useScroll } from '/app/context/ScrollContext';
+import useSceneAnimationSprings from './SceneAnimationSprings';
 
 // Carpet cylinder component
 const CarpetCylinder = ({ position, scale, color, wireframe }) => {
@@ -15,7 +16,7 @@ const CarpetCylinder = ({ position, scale, color, wireframe }) => {
 
   return (
     <mesh position={position} ref={cylinderRef}>
-      <cylinderGeometry args={[scale * 1, scale * 1, 0.2, 64]} />
+      <cylinderGeometry args={[scale * 1, scale * 1, 0.1, 64]} />
       <meshStandardMaterial
         color={color}
         wireframe={wireframe}
@@ -28,84 +29,79 @@ const CarpetCylinder = ({ position, scale, color, wireframe }) => {
 };
 
 // Orbiting Model Component
-const OrbitingModel = ({
-  modelPath,
-  position,
-  radius,
-  speed,
-  orbitingModelSpring,
-}) => {
+const OrbitingModel = ({ modelPath, radius, speed, position, rotation }) => {
   const groupRef = useRef();
   const { scene } = useGLTF(modelPath);
+  const { welcomeProgress } = useScroll();
 
-  // Orbital movement
-  useFrame((state, delta) => {
+  const { scaleValue } = useSpring({
+    scaleValue: welcomeProgress > 0.4 ? 0.6 : 0,
+    config: {
+      mass: 1,
+      tension: 170,
+      friction: 26,
+    },
+  });
+
+  useFrame(({ clock }) => {
     if (groupRef.current) {
-      const time = state.clock.getElapsedTime() * speed;
-      groupRef.current.position.x = position[0] + Math.cos(time) * radius;
-      groupRef.current.position.y = position[1];
-      groupRef.current.position.z = position[2] + Math.sin(time) * radius;
+      const elapsedTime = clock.getElapsedTime();
+      const angle = elapsedTime * speed;
+
+      groupRef.current.position.x = Math.cos(angle) * radius;
+      groupRef.current.position.z = Math.sin(angle) * radius;
     }
   });
 
-  // Detailed logging
-  useEffect(() => {
-    console.log('Orbiting Model Render:', {
-      modelPath,
-      position,
-      spring: {
-        scale: orbitingModelSpring?.scale,
-        opacity: orbitingModelSpring?.opacity,
-      },
-    });
-  }, [orbitingModelSpring, modelPath]);
-
-  // Render with explicit scale and opacity
   return (
     <animated.group
       ref={groupRef}
-      scale={orbitingModelSpring?.scale ? [1, 1, 1] : [0, 0, 0]}
-      opacity={orbitingModelSpring?.scale || 0}
+      scale={scaleValue}
+      position={[0, 3, 0]}
+      rotation={rotation}
     >
       <primitive object={scene.clone()} rotation={[0, Math.PI * -0.2, 0]} />
     </animated.group>
   );
 };
 
+OrbitingModel.propTypes = {
+  modelPath: PropTypes.string.isRequired,
+  radius: PropTypes.number.isRequired,
+  speed: PropTypes.number,
+};
+
 const GirlModelSection = ({ girlModelSpring }) => {
   // Define cylinder color
-  const cylinderColor = new THREE.Color("#D2DBCD");
-  const { scrollProgress } = useScroll();
-  const { orbitingModelSpring } = useSceneAnimationSprings(scrollProgress);
+  const cylinderColor = new THREE.Color('#D2DBCD');
 
   return (
     <animated.group
       position={girlModelSpring.position}
       scale={girlModelSpring.scale}
-      opacity={girlModelSpring.opacity}
+      rotation={girlModelSpring.rotation}
     >
       <group>
-        <GirlModel wireframe={true} />
-
-        {/* Orbiting Models */}
-        <OrbitingModel
-          modelPath="/models/abc.glb"
-          position={[0, 2, 0]}
-          radius={2}
-          speed={0.5}
-          orbitingModelSpring={orbitingModelSpring}
-        />
-        <OrbitingModel
-          modelPath="/models/book.glb"
-          position={[0, 2, 0]}
-          radius={-2}
-          speed={0.5}
-          orbitingModelSpring={orbitingModelSpring}
-        />
+        <GirlModel />
+        <group rotation={[0.3, 0, 0.3]}>
+          {/* Orbiting Models */}
+          <OrbitingModel
+            modelPath="/models/abc.glb"
+            radius={2}
+            speed={0.5}
+            rotation={[Math.PI * -0.06, 0, Math.PI * -0.05]}
+          />
+          <OrbitingModel
+            modelPath="/models/book.glb"
+            radius={-2}
+            speed={0.5}
+            rotation={[Math.PI * 0.1, 0, Math.PI * 0.1]}
+          />
+        </group>
 
         {/* Cylinder below the carpet */}
         <CarpetCylinder
-          position={[0, 0.1, 0]}
+          position={[0, 0.03, 0]}
           scale={1.9}
           color={cylinderColor}
           wireframe={false}

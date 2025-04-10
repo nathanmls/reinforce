@@ -6,22 +6,22 @@ export const useModelSetup = () => {
     return new Promise((resolve, reject) => {
       const loader = new GLTFLoader();
       loader.load(
-        "/models/tia-placeholder.glb",
+        '/models/tia-placeholder.glb',
         (gltf) => {
           const model = gltf.scene;
           model.scale.set(3, 3, 3);
           model.position.set(0, 0, 0);
-          
+
           // Store bones in a map for easier access
           const bones = {
             jaw: null,
-            head: null
+            head: null,
           };
-          
+
           // Collect bone and mesh information
           const bonesInfo = [];
           const meshesInfo = [];
-          
+
           model.traverse((node) => {
             if (node.isBone) {
               bonesInfo.push({
@@ -29,17 +29,17 @@ export const useModelSetup = () => {
                 position: node.position,
                 rotation: node.rotation,
                 quaternion: node.quaternion,
-                parent: node.parent?.name
+                parent: node.parent?.name,
               });
             }
-            
+
             if (node.isMesh) {
               node.castShadow = true;
               node.receiveShadow = true;
               if (node.skeleton) {
                 meshesInfo.push({
                   name: node.name,
-                  bones: node.skeleton.bones.map(b => b.name)
+                  bones: node.skeleton.bones.map((b) => b.name),
                 });
               }
             }
@@ -48,7 +48,9 @@ export const useModelSetup = () => {
             if (node.name === 'jaw_master') {
               bones.jaw = node;
               bones.jaw.initialRotation = new THREE.Euler().copy(node.rotation);
-              bones.jaw.initialQuaternion = new THREE.Quaternion().copy(node.quaternion);
+              bones.jaw.initialQuaternion = new THREE.Quaternion().copy(
+                node.quaternion
+              );
               bones.jaw.matrixAutoUpdate = true;
               bones.jaw.rotation.order = 'XYZ';
             }
@@ -56,8 +58,12 @@ export const useModelSetup = () => {
             // Store the head bone reference
             if (node.name === 'head') {
               bones.head = node;
-              bones.head.initialRotation = new THREE.Euler().copy(node.rotation);
-              bones.head.initialQuaternion = new THREE.Quaternion().copy(node.quaternion);
+              bones.head.initialRotation = new THREE.Euler().copy(
+                node.rotation
+              );
+              bones.head.initialQuaternion = new THREE.Quaternion().copy(
+                node.quaternion
+              );
               bones.head.matrixAutoUpdate = true;
               bones.head.rotation.order = 'XYZ';
             }
@@ -67,15 +73,15 @@ export const useModelSetup = () => {
           console.group('Model Information');
           console.log('Total bones:', bonesInfo.length);
           console.log('Total meshes with skeletons:', meshesInfo.length);
-          
+
           console.group('Bones');
-          bonesInfo.forEach(bone => console.log(`${bone.name}:`, bone));
+          bonesInfo.forEach((bone) => console.log(`${bone.name}:`, bone));
           console.groupEnd();
-          
+
           console.group('Meshes');
-          meshesInfo.forEach(mesh => console.log(`${mesh.name}:`, mesh));
+          meshesInfo.forEach((mesh) => console.log(`${mesh.name}:`, mesh));
           console.groupEnd();
-          
+
           console.groupEnd();
 
           resolve({ model, bones });
@@ -98,7 +104,7 @@ export const useModelSetup = () => {
       'XYZ'
     );
     targetQuaternion.setFromEuler(euler);
-    
+
     // Smoothly interpolate current rotation to target
     const speed = settings.headRotationSpeed || 0.05;
     headBone.quaternion.slerp(targetQuaternion, speed);
@@ -113,12 +119,13 @@ export const useModelSetup = () => {
       enableAnimation: true,
       manualRotation: 0,
       animationSpeed: 0.1,
-      animationAmplitude: 0.1
+      animationAmplitude: 0.1,
     };
 
     if (jawSettings.enableAnimation) {
       // Calculate jaw rotation using quaternion
-      const jawRotation = Math.sin(animationState.rotation) * jawSettings.animationAmplitude;
+      const jawRotation =
+        Math.sin(animationState.rotation) * jawSettings.animationAmplitude;
       const jawEuler = new THREE.Euler(
         jawBone.initialRotation.x + jawRotation,
         jawBone.initialRotation.y,
@@ -127,7 +134,7 @@ export const useModelSetup = () => {
       );
       const jawQuaternion = new THREE.Quaternion().setFromEuler(jawEuler);
       jawBone.quaternion.copy(jawQuaternion);
-      
+
       // Update animation state
       animationState.rotation += jawSettings.animationSpeed;
     } else {
@@ -141,13 +148,13 @@ export const useModelSetup = () => {
       const jawQuaternion = new THREE.Quaternion().setFromEuler(jawEuler);
       jawBone.quaternion.copy(jawQuaternion);
     }
-    
+
     jawBone.updateMatrix();
   };
 
   return {
     loadModel,
     updateHeadRotation,
-    updateJawRotation
+    updateJawRotation,
   };
 };

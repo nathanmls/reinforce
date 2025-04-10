@@ -11,14 +11,16 @@ const isBrowser = typeof window !== 'undefined';
 const getRequiredPermission = (pathname) => {
   // Only run this on the client side
   if (!isBrowser || !pathname) return null;
-  
+
   const path = pathname.split('/')[2]; // Get the second part of the path after /dashboard/
-  
+
   switch (path) {
     case 'users':
       return 'canAccessUsers';
     case 'students':
       return 'canAccessStudents';
+    case 'homework':
+      return 'canAccessHomework';
     case 'mentors':
       return 'canAccessMentors';
     case 'plan':
@@ -39,10 +41,10 @@ const ProtectedRoute = ({ children }) => {
   useEffect(() => {
     // Skip this effect on server-side rendering
     if (!isBrowser) return;
-    
+
     // Wait for auth to initialize
     if (!initialized) return;
-    
+
     // If not loading and no user, redirect to login
     if (!loading && !user) {
       router.push('/login');
@@ -51,16 +53,17 @@ const ProtectedRoute = ({ children }) => {
 
     // Get required permission for current path
     const requiredPermission = getRequiredPermission(pathname);
-    
+
     // Get user permissions based on role
-    const permissions = userRole && ROLE_PERMISSIONS[userRole] ? ROLE_PERMISSIONS[userRole] : {};
+    const permissions =
+      userRole && ROLE_PERMISSIONS[userRole] ? ROLE_PERMISSIONS[userRole] : {};
 
     // If page requires specific permission and user doesn't have it
     if (requiredPermission && !permissions[requiredPermission]) {
       console.log('Access denied:', pathname, 'requires', requiredPermission);
       router.push('/painel'); // Redirect to main dashboard which should be accessible by all
     }
-    
+
     // Mark permission check as complete
     setIsChecking(false);
   }, [router, user, userRole, pathname, loading, initialized]);
@@ -77,7 +80,8 @@ const ProtectedRoute = ({ children }) => {
 
   // Final permission check before rendering
   const requiredPermission = getRequiredPermission(pathname);
-  const permissions = userRole && ROLE_PERMISSIONS[userRole] ? ROLE_PERMISSIONS[userRole] : {};
+  const permissions =
+    userRole && ROLE_PERMISSIONS[userRole] ? ROLE_PERMISSIONS[userRole] : {};
 
   if (requiredPermission && !permissions[requiredPermission]) {
     return null;

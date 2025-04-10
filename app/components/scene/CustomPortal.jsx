@@ -90,7 +90,7 @@ function createRoundedRectShape(width, height, radius) {
   const shape = new THREE.Shape();
   const x = -width / 2;
   const y = -height / 2;
-  
+
   shape.moveTo(x + radius, y);
   shape.lineTo(x + width - radius, y);
   shape.quadraticCurveTo(x + width, y, x + width, y + radius);
@@ -100,12 +100,12 @@ function createRoundedRectShape(width, height, radius) {
   shape.quadraticCurveTo(x, y + height, x, y + height - radius);
   shape.lineTo(x, y + radius);
   shape.quadraticCurveTo(x, y, x + radius, y);
-  
-  return shape;
-};
 
-export default function CustomPortal({ 
-  children, 
+  return shape;
+}
+
+export default function CustomPortal({
+  children,
   position = [0, 0, 0],
   rotation = [0, 0, 0],
   scale = 1,
@@ -116,67 +116,71 @@ export default function CustomPortal({
   const lightRef = useRef();
   const [hovered, setHovered] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  
+
   // Handle client-side only rendering
   useEffect(() => {
     setIsMounted(true);
   }, []);
-  
+
   // Notify parent component about hover state changes
   useEffect(() => {
     if (onHoverChange) {
       onHoverChange(hovered);
     }
   }, [hovered, onHoverChange]);
-  
+
   // Create portal geometry using extruded shape instead of roundedBoxGeometry
   const portalGeometry = useMemo(() => {
     if (typeof window === 'undefined') return null;
-    
-    const shape = createRoundedRectShape(PORTAL_CONFIG.width, PORTAL_CONFIG.height, PORTAL_CONFIG.radius);
+
+    const shape = createRoundedRectShape(
+      PORTAL_CONFIG.width,
+      PORTAL_CONFIG.height,
+      PORTAL_CONFIG.radius
+    );
     const extrudeSettings = {
       steps: 1,
       depth: PORTAL_CONFIG.depth,
-      bevelEnabled: false
+      bevelEnabled: false,
     };
     return new THREE.ExtrudeGeometry(shape, extrudeSettings);
   }, []);
-  
+
   // Create frame geometry (slightly larger)
   const frameGeometry = useMemo(() => {
     if (typeof window === 'undefined') return null;
-    
+
     const shape = createRoundedRectShape(
-      PORTAL_CONFIG.width + 0.05, 
-      PORTAL_CONFIG.height + 0.05, 
+      PORTAL_CONFIG.width + 0.05,
+      PORTAL_CONFIG.height + 0.05,
       PORTAL_CONFIG.radius + 0.01
     );
     const extrudeSettings = {
       steps: 1,
       depth: 0.02,
-      bevelEnabled: false
+      bevelEnabled: false,
     };
     return new THREE.ExtrudeGeometry(shape, extrudeSettings);
   }, []);
-  
+
   const { portalScale } = useSpring({
     portalScale: hovered ? 1.02 : 1,
-    config: { mass: 0.3, tension: 400, friction: 20 }
+    config: { mass: 0.3, tension: 400, friction: 20 },
   });
 
   useFrame((state, delta) => {
     if (!isMounted) return;
-    
+
     const time = state.clock.elapsedTime * 0.5;
-    
+
     if (lightRef.current) {
       const intensity = 12 + Math.sin(time) * 1.5;
       lightRef.current.intensity = intensity;
       if (time % 2 > 1) {
-        lightRef.current.color.setHSL(time * 0.05 % 1, 0.7, 0.7);
+        lightRef.current.color.setHSL((time * 0.05) % 1, 0.7, 0.7);
       }
     }
-    
+
     if (portalRef.current) {
       portalRef.current.blend = THREE.MathUtils.lerp(
         portalRef.current.blend,
@@ -192,7 +196,7 @@ export default function CustomPortal({
   }
 
   return (
-    <animated.group 
+    <animated.group
       position={position}
       rotation={rotation}
       scale={portalScale}
@@ -203,44 +207,41 @@ export default function CustomPortal({
       <mesh geometry={frameGeometry} position={[0, 0, -0.001]}>
         <meshBasicMaterial color="black" />
       </mesh>
-      
+
       {/* Main portal with MeshPortalMaterial */}
       <mesh geometry={portalGeometry}>
-      <MeshPortalMaterial 
-      ref={portalRef}
-      transparent={true}
-      toneMapped={false}
-      transmission={1}
-      resolution={256}
-      side={THREE.DoubleSide}
-      >          
-      <color attach="background" args={['#B4D45A']} />
+        <MeshPortalMaterial
+          ref={portalRef}
+          transparent={true}
+          toneMapped={false}
+          transmission={1}
+          resolution={256}
+          side={THREE.DoubleSide}
+        >
+          <color attach="background" args={['#B4D45A']} />
           {/* <fog attach="fog" args={['#1a1a1a', 15, 25]} /> */}
-          
+
           {/* Ground plane */}
-          <mesh 
-            rotation={[-Math.PI / 2, 0, 0]} 
-            position={[0, -2, 0]}
-          >
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]}>
             <planeGeometry args={[50, 50]} />
             <meshStandardMaterial color="#5A1A8A" />
           </mesh>
 
           <ambientLight intensity={4.8} />
-          <spotLight 
+          <spotLight
             ref={lightRef}
-            position={[0, 5, 4]} 
+            position={[0, 5, 4]}
             intensity={8}
             angle={0.8}
             penumbra={0.5}
             decay={1.5}
             castShadow
           />
-          
+
           {children}
         </MeshPortalMaterial>
       </mesh>
-      
+
       {/* Point light for external glow */}
       {/* <pointLight
         position={[0, 0, 1]}

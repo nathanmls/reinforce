@@ -1,25 +1,25 @@
-"use client";
+'use client';
 
-import { useThree } from "@react-three/fiber";
-import { useAuth } from "@/context/AuthContext";
-import { useScroll } from "@/context/ScrollContext";
-import { useScene } from "@/context/SceneContext";
-import SceneLighting from "./SceneLighting";
-import SceneBackground from "./SceneBackground";
-import SceneDebugHelpers from "./SceneDebugHelpers";
-import HeroSection from "./HeroSection";
-import WelcomeSection from "./WelcomeSection";
-import MeetTiaSection from "./MeetTiaSection";
-import GirlModelSection from "./GirlModelSection";
-import SceneCamera from "./SceneCamera";
-import SceneShadowSetup from "./SceneShadowSetup";
-import CameraController from "./CameraController";
-import SceneSpotlight from "./SceneSpotlight";
-import useSceneAnimationSprings from "./SceneAnimationSprings";
-import { useGroupPositionUpdate } from "@/hooks/useGroupPositionUpdate";
-import NoiseEffect from "../effects/NoiseEffect";
-import MouseFollowCamera from "./MouseFollowCamera";
-import { Sparkles } from "@react-three/drei";
+import { useThree } from '@react-three/fiber';
+import { useAuth } from '@/context/AuthContext';
+import { useScroll } from '@/context/ScrollContext';
+import { useScene } from '@/context/SceneContext';
+import SceneLighting from './SceneLighting';
+import SceneBackground from './SceneBackground';
+import SceneDebugHelpers from './SceneDebugHelpers';
+import HeroSection from './HeroSection';
+import WelcomeSection from './WelcomeSection';
+import MeetTiaSection from './MeetTiaSection';
+import GirlModelSection from './GirlModelSection';
+import SceneCamera from './SceneCamera';
+import SceneShadowSetup from './SceneShadowSetup';
+import CameraController from './CameraController';
+import SceneSpotlight from './SceneSpotlight';
+import useSceneAnimationSprings from './SceneAnimationSprings';
+import { useGroupPositionUpdate } from '@/hooks/useGroupPositionUpdate';
+import NoiseEffect from '../effects/NoiseEffect';
+import MouseFollowCamera from './MouseFollowCamera';
+import { Sparkles } from '@react-three/drei';
 
 const SceneComposition = () => {
   const { userRole } = useAuth();
@@ -31,7 +31,7 @@ const SceneComposition = () => {
     comingSoonProgress,
   } = useScroll();
   const { scene, gl } = useThree();
-  
+
   const {
     cameraRef,
     groupRef,
@@ -39,7 +39,7 @@ const SceneComposition = () => {
     spotlightTargetRef,
     isWallTransitioned,
     isExplorationMode,
-    handleCameraStateChange
+    handleCameraStateChange,
   } = useScene();
 
   // Get all animation springs from the custom hook
@@ -47,7 +47,7 @@ const SceneComposition = () => {
     { heroProgress, welcomeProgress, mentorProgress, meetTiaProgress },
     isWallTransitioned
   );
-  
+
   // Destructure the setIsMeetTiaCloseup function and isMeetTiaCloseup state from springs
   const { setIsMeetTiaCloseup, isMeetTiaCloseup } = springs;
 
@@ -56,27 +56,45 @@ const SceneComposition = () => {
 
   return (
     <>
-        {/* Sparkles effect for magical atmosphere */}
-        <Sparkles 
-        count={500} 
-        scale={20} 
-        size={1} 
-        speed={0.3} 
+      {/* Sparkles effect for magical atmosphere */}
+      <Sparkles
+        count={500}
+        scale={20}
+        size={1}
+        speed={0.3}
         opacity={0.5}
         color="#B4D45A"
       />
       {/* Apply noise effect to the entire scene except characters */}
       <NoiseEffect intensity={0} scale={10.0} />
-      
+
       <SceneShadowSetup gl={gl} />
       <SceneCamera ref={cameraRef} position={[0, 0, 5]} />
-      <MouseFollowCamera 
-        intensity={0.40} 
-        rotationIntensity={0.15} 
-        smoothing={15} 
-        enabled={!isExplorationMode && !isMeetTiaCloseup && mentorProgress <= 0.7} 
+      <MouseFollowCamera
+        intensity={0.9}
+        smoothing={10}
+        enabled={
+          !isExplorationMode && !isMeetTiaCloseup && mentorProgress <= 0.7
+        }
+        showHelper={isExplorationMode}
+        currentSection={
+          meetTiaProgress > 0
+            ? 'meetTia'
+            : mentorProgress > 0
+            ? 'mentor'
+            : welcomeProgress > 0
+            ? 'welcome'
+            : 'hero'
+        }
+        lookTargetOffset={{
+          hero: { x: 0, y: 0, z: 0 },
+          welcome: { x: 0, y: 0, z: 0 },
+          mentor: { x: 0, y: 0, z: 0 },
+          meetTia: { x: 0, y: 0, z: 0 },
+        }}
+        orbitRadius={1.5}
       />
-      
+
       <CameraController
         cameraRef={cameraRef}
         groupRef={groupRef}
@@ -88,12 +106,12 @@ const SceneComposition = () => {
           welcomeProgress,
           mentorProgress,
           meetTiaProgress,
-          comingSoonProgress
+          comingSoonProgress,
         }}
         onCameraStateChange={handleCameraStateChange}
         updatePortalCloseupState={setIsMeetTiaCloseup} // Pass the setter function to CameraController with renamed prop
       />
-      
+
       <SceneSpotlight isExplorationMode={isExplorationMode} />
 
       <SceneLighting showHelpers={isExplorationMode} groupRef={groupRef} />
@@ -105,34 +123,34 @@ const SceneComposition = () => {
         meetTiaProgress={meetTiaProgress}
       />
 
-      <SceneDebugHelpers 
-        isExplorationMode={isExplorationMode} 
-        userRole={userRole} 
-        spotlightRef={spotlightRef} 
+      <SceneDebugHelpers
+        isExplorationMode={isExplorationMode}
+        userRole={userRole}
+        spotlightRef={spotlightRef}
       />
 
       <group position={[0, 0, 0]}>
-        <HeroSection 
-          heroSpring={springs.heroSpring} 
-          isExplorationMode={isExplorationMode} 
+        <HeroSection
+          heroSpring={springs.heroSpring}
+          isExplorationMode={isExplorationMode}
         />
       </group>
 
-      <WelcomeSection 
-        welcomementorSpring={springs.welcomementorSpring} 
-        isExplorationMode={isExplorationMode} 
+      <WelcomeSection
+        welcomementorSpring={springs.welcomementorSpring}
+        isExplorationMode={isExplorationMode}
       />
 
-      <MeetTiaSection 
-        meetTiaSpring={springs.meetTiaSpring} 
+      <MeetTiaSection
+        meetTiaSpring={springs.meetTiaSpring}
         tiaPortalSpring={springs.tiaPortalSpring}
-        isExplorationMode={isExplorationMode} 
+        isExplorationMode={isExplorationMode}
       />
 
       <group ref={groupRef}>
-        <GirlModelSection 
-          girlModelSpring={springs.girlModelSpring} 
-          isExplorationMode={isExplorationMode} 
+        <GirlModelSection
+          girlModelSpring={springs.girlModelSpring}
+          isExplorationMode={isExplorationMode}
         />
       </group>
     </>

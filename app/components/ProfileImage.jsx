@@ -19,17 +19,17 @@ export default function ProfileImage({ onImageUpdated }) {
     try {
       setLoading(true);
       setError('');
-      
+
       const userRef = doc(db, 'users', user.uid);
       await updateDoc(userRef, {
         profileImage: imageUrl,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       });
 
       await updateUserProfile(user.uid);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
-      
+
       // Notify parent component if needed
       if (onImageUpdated) {
         onImageUpdated(imageUrl);
@@ -49,20 +49,14 @@ export default function ProfileImage({ onImageUpdated }) {
           onImageUpload={handleImageUpload}
           currentImage={userProfile?.profileImage}
         />
-        
+
         <div className="flex-1">
           {loading && (
-            <p className="text-sm text-blue-600">
-              {t.settings.saving}
-            </p>
+            <p className="text-sm text-blue-600">{t.settings.saving}</p>
           )}
-          
-          {error && (
-            <p className="text-sm text-red-600">
-              {error}
-            </p>
-          )}
-          
+
+          {error && <p className="text-sm text-red-600">{error}</p>}
+
           {success && (
             <p className="text-sm text-green-600">
               {t.settings.successMessage}

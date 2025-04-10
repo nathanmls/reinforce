@@ -4,10 +4,7 @@ import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 
 // Dynamically import the CustomPortal component with SSR disabled
-const CustomPortal = dynamic(
-  () => import('./CustomPortal'),
-  { ssr: false }
-);
+const CustomPortal = dynamic(() => import('./CustomPortal'), { ssr: false });
 
 /**
  * ClientOnlyPortal is a wrapper component that ensures the CustomPortal component

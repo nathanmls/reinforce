@@ -1,15 +1,15 @@
 'use client';
 
-import { useRef } from "react";
-import { useLoader, useFrame } from "@react-three/fiber";
-import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
+import { useRef } from 'react';
+import { useLoader, useFrame } from '@react-three/fiber';
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
 import * as THREE from 'three';
 
 export default function HeroModel() {
   const mixer = useRef();
   const clock = useRef(new THREE.Clock());
   const animationTimeRef = useRef(0);
-  const model = useLoader(FBXLoader, "/models/Waving.fbx");
+  const model = useLoader(FBXLoader, '/models/Waving.fbx');
 
   // Initialize animation
   if (!mixer.current) {
@@ -40,11 +40,6 @@ export default function HeroModel() {
   });
 
   return (
-    <primitive 
-      object={model} 
-      scale={2.6} 
-      position={[0, 0.02, 0]}
-      castShadow
-    />
+    <primitive object={model} scale={2.6} position={[0, 0.02, 0]} castShadow />
   );
 }

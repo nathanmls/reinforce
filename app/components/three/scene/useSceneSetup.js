@@ -9,13 +9,13 @@ export const useSceneSetup = () => {
       antialias: true,
       alpha: true,
     });
-    
+
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    
+
     return renderer;
   };
 
@@ -50,7 +50,7 @@ export const useSceneSetup = () => {
     // Add floor
     const floorGeometry = new THREE.CircleGeometry(30, 64);
     const floorMaterial = new THREE.MeshPhongMaterial({
-      color: 0xC7DF88,
+      color: 0xc7df88,
       side: THREE.DoubleSide,
     });
     const floor = new THREE.Mesh(floorGeometry, floorMaterial);
@@ -66,14 +66,14 @@ export const useSceneSetup = () => {
       // Core display settings
       showBackground: true,
       backgroundBlur: 0,
-      
+
       // Rendering intensity and exposure
       intensity: 1.0,
       exposure: 1.0,
-      
+
       // Rotation and bounds
       rotation: 0,
-      
+
       // Safeguard min/max values
       minIntensity: 0,
       maxIntensity: 2,
@@ -81,9 +81,9 @@ export const useSceneSetup = () => {
       maxExposure: 2,
       minRotation: 0,
       maxRotation: Math.PI * 2,
-      
+
       // Merge with provided settings, with defaults as fallback
-      ...(settings || {})
+      ...(settings || {}),
     };
 
     try {
@@ -95,46 +95,46 @@ export const useSceneSetup = () => {
       const rgbeLoader = new RGBELoader();
       const texture = await rgbeLoader.loadAsync('/environment/SunriseBG.hdr');
       texture.mapping = THREE.EquirectangularReflectionMapping;
-      
+
       // Safely apply environment settings
       scene.environment = texture;
-      
+
       // Background handling with explicit null check
       scene.background = safeSettings.showBackground === true ? texture : null;
-      
+
       // Rotation with bounds checking
       const rotationValue = Math.max(
-        safeSettings.minRotation, 
+        safeSettings.minRotation,
         Math.min(safeSettings.maxRotation, safeSettings.rotation || 0)
       );
       texture.offset.x = rotationValue / (2 * Math.PI);
-      
+
       // Renderer exposure with bounds checking
       if (renderer) {
         const exposureValue = Math.max(
-          safeSettings.minExposure, 
+          safeSettings.minExposure,
           Math.min(safeSettings.maxExposure, safeSettings.exposure || 1.0)
         );
         renderer.toneMappingExposure = exposureValue;
       }
-      
+
       // Material environment map intensity
       const intensityValue = Math.max(
-        safeSettings.minIntensity, 
+        safeSettings.minIntensity,
         Math.min(safeSettings.maxIntensity, safeSettings.intensity || 1.0)
       );
-      
+
       scene.traverse((node) => {
         if (node.isMesh && node.material) {
           node.material.envMapIntensity = intensityValue;
           node.material.needsUpdate = true;
         }
       });
-      
+
       return texture;
     } catch (error) {
       console.error('Comprehensive error in environment map loading:', error);
-      
+
       // Provide a fallback or graceful degradation
       return null;
     }
@@ -153,7 +153,7 @@ export const useSceneSetup = () => {
       intensity: 1.0,
       exposure: 1.0,
       rotation: 0,
-      ...settings
+      ...settings,
     };
 
     try {
@@ -163,7 +163,7 @@ export const useSceneSetup = () => {
 
       // Update environment map settings
       envMap.offset.x = (safeSettings.rotation || 0) / (2 * Math.PI);
-      
+
       // Update material environment maps
       scene.traverse((node) => {
         if (node.isMesh && node.material) {

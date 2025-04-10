@@ -6,12 +6,19 @@ import LoadingSpinner from '../LoadingSpinner';
 import ClientOnly from '../ClientOnly';
 
 // The main form component
-function ElevenLabsAgentFormContent({ mentor, onSubmit, onCancel, isEditing = false, agent = null, initialData = null }) {
+function ElevenLabsAgentFormContent({
+  mentor,
+  onSubmit,
+  onCancel,
+  isEditing = false,
+  agent = null,
+  initialData = null,
+}) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    first_message: '', 
-    voice_id: ''
+    first_message: '',
+    voice_id: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -24,18 +31,19 @@ function ElevenLabsAgentFormContent({ mentor, onSubmit, onCancel, isEditing = fa
       setFormData({
         name: initialData.name || '',
         description: initialData.description || '',
-        first_message: initialData.first_message || initialData.initial_message || '',
-        voice_id: initialData.voice_id || ''
+        first_message:
+          initialData.first_message || initialData.initial_message || '',
+        voice_id: initialData.voice_id || '',
       });
     } else if (isEditing && agent) {
       setFormData({
         name: agent.name || '',
         description: agent.description || '',
         first_message: agent.first_message || agent.initial_message || '',
-        voice_id: agent.voice_id || ''
+        voice_id: agent.voice_id || '',
       });
     }
-    
+
     // Load available voices from ElevenLabs API
     const loadVoices = async () => {
       try {
@@ -53,15 +61,15 @@ function ElevenLabsAgentFormContent({ mentor, onSubmit, onCancel, isEditing = fa
         setLoadingVoices(false);
       }
     };
-    
+
     loadVoices();
   }, [isEditing, agent, initialData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -75,15 +83,17 @@ function ElevenLabsAgentFormContent({ mentor, onSubmit, onCancel, isEditing = fa
       if (!mentor || !mentor.id) {
         throw new Error('Mentor information is missing');
       }
-      
+
       // Call the parent component's onSubmit function with the form data
       await onSubmit(mentor.id, formData);
-      
+
       // If we get here, the submission was successful
       setLoading(false);
     } catch (err) {
       console.error('Error submitting form:', err);
-      setError(`Failed to ${isEditing ? 'update' : 'create'} agent: ${err.message}`);
+      setError(
+        `Failed to ${isEditing ? 'update' : 'create'} agent: ${err.message}`
+      );
       setLoading(false);
     }
   };
@@ -94,16 +104,19 @@ function ElevenLabsAgentFormContent({ mentor, onSubmit, onCancel, isEditing = fa
         <h2 className="text-xl font-semibold mb-4">
           {isEditing ? 'Edit ElevenLabs Agent' : 'Create ElevenLabs Agent'}
         </h2>
-        
+
         {error && (
           <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
             {error}
           </div>
         )}
-        
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="name"
+            >
               Name
             </label>
             <input
@@ -116,9 +129,12 @@ function ElevenLabsAgentFormContent({ mentor, onSubmit, onCancel, isEditing = fa
               required
             />
           </div>
-          
+
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="description"
+            >
               Description
             </label>
             <textarea
@@ -131,9 +147,12 @@ function ElevenLabsAgentFormContent({ mentor, onSubmit, onCancel, isEditing = fa
               required
             />
           </div>
-          
+
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="first_message">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="first_message"
+            >
               Initial Message
             </label>
             <textarea
@@ -147,12 +166,16 @@ function ElevenLabsAgentFormContent({ mentor, onSubmit, onCancel, isEditing = fa
               placeholder="This will be the first message the agent sends to users"
             />
             <p className="text-xs text-gray-500 mt-1">
-              This message will be sent when a user starts a conversation with the agent
+              This message will be sent when a user starts a conversation with
+              the agent
             </p>
           </div>
-          
+
           <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="voice_id">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="voice_id"
+            >
               Voice
             </label>
             {loadingVoices ? (
@@ -167,7 +190,7 @@ function ElevenLabsAgentFormContent({ mentor, onSubmit, onCancel, isEditing = fa
                 required
               >
                 <option value="">Select a voice</option>
-                {voices.map(voice => (
+                {voices.map((voice) => (
                   <option key={voice.voice_id} value={voice.voice_id}>
                     {voice.name}
                   </option>
@@ -175,7 +198,7 @@ function ElevenLabsAgentFormContent({ mentor, onSubmit, onCancel, isEditing = fa
               </select>
             )}
           </div>
-          
+
           <div className="flex items-center justify-between">
             <button
               type="button"
@@ -194,8 +217,10 @@ function ElevenLabsAgentFormContent({ mentor, onSubmit, onCancel, isEditing = fa
                   <LoadingSpinner size="small" />
                   <span className="ml-2">Processing...</span>
                 </span>
+              ) : isEditing ? (
+                'Update Agent'
               ) : (
-                isEditing ? 'Update Agent' : 'Create Agent'
+                'Create Agent'
               )}
             </button>
           </div>

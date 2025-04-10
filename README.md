@@ -1,7 +1,7 @@
 # Reinforce - AI-Powered Educational Support Platform
 
 <div align="center">
-  <img src=".github/assets/frontent-screenshot.jpeg" alt="Reinforce Platform Screenshot" width="600"/>
+  <img src=".github/assets/frontent-screenshot.jpg" alt="Reinforce Platform Screenshot" width="600"/>
 </div>
 
 ## 🎓 About Reinforce

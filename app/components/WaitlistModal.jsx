@@ -5,7 +5,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import Image from 'next/image';
 import ImageWaitlist from '../../public/images/waitlist.png';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { translations } from '../translations';
+import { translations } from '@/translations';
 
 export default function WaitlistModal({ isOpen, setIsOpen, language = 'en' }) {
   const t = translations[language] || translations.en;
@@ -47,7 +47,7 @@ export default function WaitlistModal({ isOpen, setIsOpen, language = 'en' }) {
                     <XMarkIcon className="h-6 w-6" aria-hidden="true" />
                   </button>
                 </div>
-                
+
                 <div>
                   <div className="mx-auto flex items-center justify-center">
                     <Image
@@ -58,7 +58,10 @@ export default function WaitlistModal({ isOpen, setIsOpen, language = 'en' }) {
                     />
                   </div>
                   <div className="mt-3 text-center sm:mt-5">
-                    <Dialog.Title as="h3" className="text-2xl font-semibold leading-6 text-white">
+                    <Dialog.Title
+                      as="h3"
+                      className="text-2xl font-semibold leading-6 text-white"
+                    >
                       {t.welcome.modal.title}
                     </Dialog.Title>
                     <div className="mt-2">
@@ -79,7 +82,10 @@ export default function WaitlistModal({ isOpen, setIsOpen, language = 'en' }) {
                       className="validate"
                       target="_blank"
                     >
-                      <div id="mc_embed_signup_scroll" className="flex flex-col gap-4">
+                      <div
+                        id="mc_embed_signup_scroll"
+                        className="flex flex-col gap-4"
+                      >
                         <div className="mc-field-group">
                           <input
                             type="email"
@@ -94,8 +100,16 @@ export default function WaitlistModal({ isOpen, setIsOpen, language = 'en' }) {
                           <input type="hidden" name="tags" value="2849655" />
                         </div>
                         <div id="mce-responses" className="clear foot">
-                          <div className="response" id="mce-error-response" style={{ display: 'none' }}></div>
-                          <div className="response" id="mce-success-response" style={{ display: 'none' }}></div>
+                          <div
+                            className="response"
+                            id="mce-error-response"
+                            style={{ display: 'none' }}
+                          ></div>
+                          <div
+                            className="response"
+                            id="mce-success-response"
+                            style={{ display: 'none' }}
+                          ></div>
                         </div>
                         <div className="flex items-center justify-end">
                           <button

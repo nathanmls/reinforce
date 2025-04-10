@@ -7,7 +7,11 @@ import 'react-image-crop/dist/ReactCrop.css';
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
-export default function ImageUpload({ onImageUpload, currentImage, aspectRatio = 1 }) {
+export default function ImageUpload({
+  onImageUpload,
+  currentImage,
+  aspectRatio = 1,
+}) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(currentImage || null);
   const [crop, setCrop] = useState({
@@ -16,7 +20,7 @@ export default function ImageUpload({ onImageUpload, currentImage, aspectRatio =
     height: 90,
     x: 5,
     y: 5,
-    aspect: 1
+    aspect: 1,
   });
   const [completedCrop, setCompletedCrop] = useState(null);
   const [showCropper, setShowCropper] = useState(false);
@@ -35,7 +39,8 @@ export default function ImageUpload({ onImageUpload, currentImage, aspectRatio =
 
   const validateFile = (file) => {
     if (!file) return 'Please select a file';
-    if (!ACCEPTED_TYPES.includes(file.type)) return 'Please upload a valid image file (JPEG, PNG, or WebP)';
+    if (!ACCEPTED_TYPES.includes(file.type))
+      return 'Please upload a valid image file (JPEG, PNG, or WebP)';
     if (file.size > MAX_FILE_SIZE) return 'File size must be less than 5MB';
     return null;
   };
@@ -61,7 +66,7 @@ export default function ImageUpload({ onImageUpload, currentImage, aspectRatio =
         height: 90,
         x: 5,
         y: 5,
-        aspect: 1
+        aspect: 1,
       });
       setCompletedCrop(null);
     };
@@ -71,7 +76,7 @@ export default function ImageUpload({ onImageUpload, currentImage, aspectRatio =
 
   const onImageLoad = useCallback((img) => {
     imgRef.current = img;
-    
+
     // Calculate the largest possible square crop
     const size = Math.min(img.width, img.height);
     const x = (img.width - size) / 2;
@@ -83,7 +88,7 @@ export default function ImageUpload({ onImageUpload, currentImage, aspectRatio =
       height: size,
       x,
       y,
-      aspect: 1
+      aspect: 1,
     };
 
     setCrop(newCrop);
@@ -165,7 +170,7 @@ export default function ImageUpload({ onImageUpload, currentImage, aspectRatio =
 
   return (
     <div className="space-y-4">
-      <div 
+      <div
         className="relative h-20 w-20 rounded-full overflow-hidden bg-gray-100 flex-shrink-0 cursor-pointer"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -184,7 +189,7 @@ export default function ImageUpload({ onImageUpload, currentImage, aspectRatio =
             </svg>
           </div>
         )}
-        
+
         {isHovered && (
           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white">
             <span className="text-sm">Upload</span>
@@ -200,9 +205,7 @@ export default function ImageUpload({ onImageUpload, currentImage, aspectRatio =
         onChange={handleFileSelect}
       />
 
-      {error && (
-        <div className="text-red-500 text-sm mt-2 mb-2">{error}</div>
-      )}
+      {error && <div className="text-red-500 text-sm mt-2 mb-2">{error}</div>}
 
       {isUploading && (
         <div className="text-blue-600 text-sm mt-2 mb-2">
@@ -221,13 +224,26 @@ export default function ImageUpload({ onImageUpload, currentImage, aspectRatio =
                 onClick={handleClose}
                 className="text-gray-400 hover:text-gray-500"
               >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
-            
-            <div className="relative overflow-hidden" style={{ maxHeight: 'calc(80vh - 200px)' }}>
+
+            <div
+              className="relative overflow-hidden"
+              style={{ maxHeight: 'calc(80vh - 200px)' }}
+            >
               <div className="relative w-full" style={{ maxHeight: '100%' }}>
                 <ReactCrop
                   crop={crop}
@@ -260,7 +276,9 @@ export default function ImageUpload({ onImageUpload, currentImage, aspectRatio =
               <button
                 onClick={generateCroppedImage}
                 className={`px-4 py-2 text-white rounded-lg transition-colors ${
-                  isUploading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                  isUploading
+                    ? 'bg-blue-400 cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700'
                 }`}
                 disabled={isUploading}
               >

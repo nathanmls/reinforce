@@ -7,7 +7,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@11labs/client": "latest",
@@ -28,7 +29,6 @@
     "browser-image-compression": "^2.0.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
-    "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "firebase": "^9.23.0",
@@ -41,6 +41,7 @@
     "raw-loader": "^4.0.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-error-boundary": "^5.0.0",
     "react-hot-toast": "^2.5.2",
     "react-icons": "^5.4.0",
     "react-image-crop": "^11.0.7",
@@ -55,9 +56,11 @@
     "@types/react-dom": "^18",
     "@types/tailwindcss": "^3.1.0",
     "autoprefixer": "^10.4.20",
+    "cors": "^2.8.5",
     "eslint": "^8",
     "eslint-config-next": "14.1.0",
     "postcss": "^8.5.1",
+    "prettier": "^3.5.3",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
   }

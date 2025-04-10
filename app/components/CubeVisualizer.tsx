@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useEffect, useRef } from 'react';
 import { AgentState, TrackReference } from '@livekit/components-react';
@@ -10,7 +10,11 @@ interface CubeVisualizerProps {
   className?: string;
 }
 
-export function CubeVisualizer({ state, trackRef, className = '' }: CubeVisualizerProps) {
+export function CubeVisualizer({
+  state,
+  trackRef,
+  className = '',
+}: CubeVisualizerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
@@ -25,11 +29,11 @@ export function CubeVisualizer({ state, trackRef, className = '' }: CubeVisualiz
       console.log('CubeVisualizer: Container ref is not available');
       return;
     }
-    
+
     console.log('CubeVisualizer: Initializing Three.js scene');
     console.log('Container dimensions:', {
       width: containerRef.current.clientWidth,
-      height: containerRef.current.clientHeight
+      height: containerRef.current.clientHeight,
     });
 
     // Setup Three.js scene
@@ -46,11 +50,14 @@ export function CubeVisualizer({ state, trackRef, className = '' }: CubeVisualiz
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
-      powerPreference: 'high-performance'
+      powerPreference: 'high-performance',
     });
 
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
+    renderer.setSize(
+      containerRef.current.clientWidth,
+      containerRef.current.clientHeight
+    );
     renderer.setClearColor(0x000000, 0); // This sets the clear color with 0 opacity
     containerRef.current.appendChild(renderer.domElement);
 
@@ -62,27 +69,27 @@ export function CubeVisualizer({ state, trackRef, className = '' }: CubeVisualiz
         color: 0x00ff00,
         shininess: 100,
         transparent: true,
-        opacity: 0.8
+        opacity: 0.8,
       }),
       new THREE.MeshPhongMaterial({
         color: 0x0000ff,
         shininess: 100,
         transparent: true,
-        opacity: 0.8
+        opacity: 0.8,
       }),
       new THREE.MeshPhongMaterial({
         color: 0xff0000,
         shininess: 100,
         transparent: true,
-        opacity: 0.8
-      })
+        opacity: 0.8,
+      }),
     ];
 
     // Position cubes
     const positions = [
       new THREE.Vector3(-2, 0, 0),
       new THREE.Vector3(0, 0, 0),
-      new THREE.Vector3(2, 0, 0)
+      new THREE.Vector3(2, 0, 0),
     ];
 
     positions.forEach((position, index) => {
@@ -115,10 +122,10 @@ export function CubeVisualizer({ state, trackRef, className = '' }: CubeVisualiz
     // Handle window resize
     const handleResize = () => {
       if (!containerRef.current || !camera || !renderer) return;
-      
+
       const width = containerRef.current.clientWidth;
       const height = containerRef.current.clientHeight;
-      
+
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
@@ -153,7 +160,7 @@ export function CubeVisualizer({ state, trackRef, className = '' }: CubeVisualiz
       }
       // Dispose of Three.js resources
       geometry.dispose();
-      materials.forEach(material => material.dispose());
+      materials.forEach((material) => material.dispose());
       renderer.dispose();
     };
   }, []);
@@ -167,7 +174,9 @@ export function CubeVisualizer({ state, trackRef, className = '' }: CubeVisualiz
     console.log('CubeVisualizer: Initializing audio context');
 
     const audioContext = new AudioContext();
-    const source = audioContext.createMediaStreamSource(trackRef.publication.track.mediaStream);
+    const source = audioContext.createMediaStreamSource(
+      trackRef.publication.track.mediaStream
+    );
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 32;
     source.connect(analyser);
@@ -198,17 +207,21 @@ export function CubeVisualizer({ state, trackRef, className = '' }: CubeVisualiz
 
         // Use different frequency ranges for each cube
         const ranges = [
-          [0, 3],   // Bass
-          [4, 7],   // Mid
-          [8, 11]   // High
+          [0, 3], // Bass
+          [4, 7], // Mid
+          [8, 11], // High
         ];
 
         cubes.forEach((cube, index) => {
           const [start, end] = ranges[index];
-          const average = Array.from(dataArray.slice(start, end + 1))
-            .reduce((sum, value) => sum + value, 0) / (end - start + 1);
-          
-          const scale = 1 + (average / 128); // Normalize to [1, 2] range
+          const average =
+            Array.from(dataArray.slice(start, end + 1)).reduce(
+              (sum, value) => sum + value,
+              0
+            ) /
+            (end - start + 1);
+
+          const scale = 1 + average / 128; // Normalize to [1, 2] range
           cube.scale.setScalar(scale);
         });
       }
@@ -225,7 +238,5 @@ export function CubeVisualizer({ state, trackRef, className = '' }: CubeVisualiz
     };
   }, [state]);
 
-  return (
-    <div ref={containerRef} className={`${className} agent-visualizer`} />
-  );
+  return <div ref={containerRef} className={`${className} agent-visualizer`} />;
 }

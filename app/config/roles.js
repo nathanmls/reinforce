@@ -1,7 +1,7 @@
 export const USER_ROLES = {
   ADMINISTRATOR: 'administrator',
   MANAGER: 'manager',
-  STUDENT: 'student'
+  STUDENT: 'student',
 };
 
 export const ROLE_PERMISSIONS = {
@@ -10,32 +10,35 @@ export const ROLE_PERMISSIONS = {
     canAccessUsers: true,
     canAccessMentors: true,
     canManageRoles: true,
+    canAccessHomework: true,
     canAccessStudents: true,
     canManageStudents: true,
     canAccessPlan: true,
     canAccessAccount: true,
-    canAccessInstitutions: true
+    canAccessInstitutions: true,
   },
   [USER_ROLES.MANAGER]: {
     canAccessDashboard: true,
     canAccessUsers: false,
     canAccessMentors: true,
     canManageRoles: false,
+    canAccessHomework: true,
     canAccessStudents: true,
     canManageStudents: false,
     canAccessPlan: true,
     canAccessAccount: true,
-    canAccessInstitutions: false
+    canAccessInstitutions: false,
   },
   [USER_ROLES.STUDENT]: {
     canAccessDashboard: false,
     canAccessUsers: false,
     canAccessMentors: true,
     canManageRoles: false,
+    canAccessHomework: false,
     canAccessStudents: false,
     canManageStudents: false,
     canAccessPlan: false,
     canAccessAccount: true,
-    canAccessInstitutions: false
-  }
+    canAccessInstitutions: false,
+  },
 };

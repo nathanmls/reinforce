@@ -17,7 +17,7 @@ export default function PedroModel({ opacity = 1 }) {
   return (
     <Sphere ref={meshRef} args={[1, 32, 32]}>
       <meshPhongMaterial
-        color="#48bb78"  // Green - knowledgeable and wise
+        color="#48bb78" // Green - knowledgeable and wise
         emissive="#38a169"
         specular="#ffffff"
         shininess={50}

@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useSpring } from "@react-spring/three";
+import { useState, useEffect } from 'react';
+import { useSpring } from '@react-spring/three';
 
 /**
  * Custom hook to create and manage all animation springs for the scene
@@ -41,13 +41,13 @@ export const useSceneAnimationSprings = (
     position: isMeetTiaCloseup
       ? [1.5, -7, -2.5]
       : mentorProgress > 0.7
-      ? [1.5, -7, -2.5]
-      : [1.5, -7, -2.5], // Move closer in closeup mode
+        ? [1.5, -7, -2.5]
+        : [1.5, -7, -2.5], // Move closer in closeup mode
     rotation: isMeetTiaCloseup
       ? [0, Math.PI * -0.15, 0]
       : mentorProgress > 0.7
-      ? [0, Math.PI * -0.15, 0]
-      : [0, Math.PI * -0.15, 0], // Face camera in MeetTia section
+        ? [0, Math.PI * -0.15, 0]
+        : [0, Math.PI * -0.15, 0], // Face camera in MeetTia section
     config: { mass: 1, tension: 170, friction: 26 },
   });
 
@@ -64,36 +64,14 @@ export const useSceneAnimationSprings = (
     scale: mentorProgress > 0.7 ? 0 : 1, // Hide in MeetTia section
     opacity: mentorProgress > 0.7 ? 0 : 1, // Hide in MeetTia section
     position: mentorProgress > 0.7 ? [0, -0.5, 0] : [0, 0, 0], // Move away in MeetTia section
+    rotation:
+      heroProgress > 0.5
+        ? welcomeProgress > 0.5
+          ? [0, 0, 0]
+          : [0, Math.PI * -0.9, 0]
+        : [0, 0, 0],
     config: { mass: 1, tension: 170, friction: 26 },
   });
-
-  // Orbiting Model springs
-  const orbitingModelSpring = useSpring({
-    from: { scale: 0, opacity: 0 },
-    to: { 
-      scale: welcomeProgress > 0.7 ? 1 : 0, 
-      opacity: welcomeProgress > 0.7 ? 1 : 0 
-    },
-    config: { 
-      mass: 1, 
-      tension: 170, 
-      friction: 26 
-    },
-  });
-
-  // Detailed debug log for welcome progress
-  useEffect(() => {
-    console.log('Welcome Progress Detailed:', {
-      value: welcomeProgress,
-      isGreaterThan07: welcomeProgress > 0.7,
-      orbitingModelSpring: {
-        scale: orbitingModelSpring.scale.get(),
-        opacity: orbitingModelSpring.opacity.get(),
-      },
-      heroProgress,
-      mentorProgress,
-    });
-  }, [welcomeProgress, orbitingModelSpring]);
 
   // Tia model springs
   const tiaModelSpring = useSpring({
@@ -117,7 +95,6 @@ export const useSceneAnimationSprings = (
     tiaModelSpring,
     tiaPortalSpring,
     isMeetTiaCloseup,
-    orbitingModelSpring,
     setIsMeetTiaCloseup,
   };
 };

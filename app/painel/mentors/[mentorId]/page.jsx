@@ -10,23 +10,23 @@ const mentorStyles = {
   elementary: {
     bgColor: 'bg-blue-100',
     textColor: 'text-blue-800',
-    emoji: '🎓'
+    emoji: '🎓',
   },
   middle: {
     bgColor: 'bg-green-100',
     textColor: 'text-green-800',
-    emoji: '📚'
+    emoji: '📚',
   },
   high: {
     bgColor: 'bg-purple-100',
     textColor: 'text-purple-800',
-    emoji: '🎯'
+    emoji: '🎯',
   },
   college: {
     bgColor: 'bg-orange-100',
     textColor: 'text-orange-800',
-    emoji: '🎓'
-  }
+    emoji: '🎓',
+  },
 };
 
 export default function MentorChatPage() {
@@ -35,8 +35,9 @@ export default function MentorChatPage() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
-  const style = mentorStyles[mentorId.replace('-chat', '')] || mentorStyles.elementary;
+
+  const style =
+    mentorStyles[mentorId.replace('-chat', '')] || mentorStyles.elementary;
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -81,9 +82,12 @@ export default function MentorChatPage() {
           <span className="text-4xl">{style.emoji}</span>
           <div>
             <h1 className={`text-2xl font-semibold ${style.textColor}`}>
-              {mentorId.replace('-chat', '').split('-').map(word => 
-                word.charAt(0).toUpperCase() + word.slice(1)
-              ).join(' ')} School Mentor
+              {mentorId
+                .replace('-chat', '')
+                .split('-')
+                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ')}{' '}
+              School Mentor
             </h1>
             <p className="text-gray-600">
               Welcome back, {userData?.name}! How can I help you today?
@@ -96,8 +100,8 @@ export default function MentorChatPage() {
         {/* Chat interface will be implemented here */}
         <div className="p-4 bg-white rounded-lg shadow">
           <p className="text-gray-600">
-            Chat functionality coming soon! This mentor will help you with your studies
-            and academic goals.
+            Chat functionality coming soon! This mentor will help you with your
+            studies and academic goals.
           </p>
         </div>
       </div>

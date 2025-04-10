@@ -5,7 +5,12 @@ import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import PropTypes from 'prop-types';
 
-export default function OfficeModel({ position = [0, 0, -2.2], rotation = [0, Math.PI*-0.5, 0], scale = 1, wireframe = false }) {
+export default function OfficeModel({
+  position = [0, 0, -2.2],
+  rotation = [0, Math.PI * -0.5, 0],
+  scale = 1,
+  wireframe = false,
+}) {
   const { scene } = useGLTF('/models/office.glb');
   const modelRef = useRef();
 
@@ -25,7 +30,7 @@ export default function OfficeModel({ position = [0, 0, -2.2], rotation = [0, Ma
           child.material.shadowSide = THREE.DoubleSide;
           child.material.wireframe = wireframe;
           child.material.needsUpdate = true;
-          
+
           // Adjust material properties for better shadows
           if ('metalness' in child.material) {
             child.material.metalness = 0.1;
@@ -41,7 +46,7 @@ export default function OfficeModel({ position = [0, 0, -2.2], rotation = [0, Ma
         if (child.isMesh) {
           child.geometry.dispose();
           if (Array.isArray(child.material)) {
-            child.material.forEach(material => material.dispose());
+            child.material.forEach((material) => material.dispose());
           } else {
             child.material.dispose();
           }
@@ -51,9 +56,9 @@ export default function OfficeModel({ position = [0, 0, -2.2], rotation = [0, Ma
   }, [scene, wireframe]);
 
   return (
-    <primitive 
+    <primitive
       ref={modelRef}
-      object={scene} 
+      object={scene}
       position={position}
       rotation={rotation}
       scale={scale}
@@ -67,7 +72,7 @@ OfficeModel.propTypes = {
   position: PropTypes.arrayOf(PropTypes.number),
   rotation: PropTypes.arrayOf(PropTypes.number),
   scale: PropTypes.number,
-  wireframe: PropTypes.bool
+  wireframe: PropTypes.bool,
 };
 
 useGLTF.preload('/models/office.glb');

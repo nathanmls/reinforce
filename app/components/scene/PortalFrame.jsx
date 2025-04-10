@@ -4,13 +4,16 @@ import dynamic from 'next/dynamic';
 import * as THREE from 'three';
 import PropTypes from 'prop-types';
 
-const Text = dynamic(() => import('@react-three/drei').then((mod) => mod.Text), {
-  ssr: false
-});
+const Text = dynamic(
+  () => import('@react-three/drei').then((mod) => mod.Text),
+  {
+    ssr: false,
+  }
+);
 
 const GOLDENRATIO = 1.61803398875;
 
-export default function PortalFrame({ 
+export default function PortalFrame({
   width = 4,
   height = GOLDENRATIO * 4,
   children,
@@ -32,7 +35,7 @@ export default function PortalFrame({
       </mesh>
 
       {/* Decorative elements */}
-      <mesh position={[width/2 - 0.1, -height/2 + 0.1, 0.02]}>
+      <mesh position={[width / 2 - 0.1, -height / 2 + 0.1, 0.02]}>
         <ringGeometry args={[0.05, 0.08, 16]} />
         <meshBasicMaterial color="#AB27D2" />
       </mesh>
@@ -47,5 +50,5 @@ PortalFrame.propTypes = {
   position: PropTypes.arrayOf(PropTypes.number),
   rotation: PropTypes.arrayOf(PropTypes.number),
   title: PropTypes.string,
-  subtitle: PropTypes.string
+  subtitle: PropTypes.string,
 };
