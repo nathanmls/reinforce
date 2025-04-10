@@ -1,19 +1,23 @@
 'use client';
 
 import { initializeApp, getApps } from 'firebase/app';
-import { getAuth, setPersistence, browserLocalPersistence } from 'firebase/auth';
+import {
+  getAuth,
+  setPersistence,
+  browserLocalPersistence,
+} from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA4WNpKyPKuZTGcFFvhJaqs-z97ILDcz0k",
-  authDomain: "reinforce-338b3.firebaseapp.com",
-  databaseURL: "https://reinforce-338b3-default-rtdb.firebaseio.com",
-  projectId: "reinforce-338b3",
-  storageBucket: "reinforce-338b3.firebasestorage.app",
-  messagingSenderId: "706280654033",
-  appId: "1:706280654033:web:c661fe657313912d4ab1f0",
-  measurementId: "G-WFWBW7L73G",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
@@ -29,17 +33,16 @@ if (isBrowser) {
   try {
     // Initialize or get existing app
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-    
+
     // Initialize services
     auth = getAuth(app);
     db = getFirestore(app);
     storage = getStorage(app);
 
     // Enable auth persistence
-    setPersistence(auth, browserLocalPersistence)
-      .catch((error) => {
-        console.warn('Auth persistence failed, falling back to default:', error);
-      });
+    setPersistence(auth, browserLocalPersistence).catch((error) => {
+      console.warn('Auth persistence failed, falling back to default:', error);
+    });
   } catch (error) {
     console.error('Firebase initialization error:', error);
     // Set services to null if initialization fails

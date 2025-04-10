@@ -12,13 +12,14 @@ let ELEVENLABS_API_KEY = '';
 
 // Only access environment variables in browser context to avoid SSR issues
 if (isBrowser) {
-  ELEVENLABS_API_KEY = process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY || 'sk_7d082225ee6a69ae4a0019b6ee0d3339f28ca946ffec0511';
+  ELEVENLABS_API_KEY = process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY || '';
+  
+  if (!ELEVENLABS_API_KEY) {
+    console.warn('NEXT_PUBLIC_ELEVENLABS_API_KEY is not set. ElevenLabs features will not work.');
+  }
 }
 
 // ElevenLabs API URL
 const ELEVENLABS_API_URL = 'https://api.elevenlabs.io';
 
-export {
-  ELEVENLABS_API_KEY,
-  ELEVENLABS_API_URL
-};
+export { ELEVENLABS_API_KEY, ELEVENLABS_API_URL };
