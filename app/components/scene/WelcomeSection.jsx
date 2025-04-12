@@ -1,12 +1,11 @@
 'use client';
 
 import { animated, useSpring } from '@react-spring/three';
-import { RoundedBox } from '@react-three/drei';
 import { useState } from 'react';
 import BoyModel from './BoyModel';
-import TiaModel from './TiaModel';
 import { RainbowFloor } from './RainbowFloor';
 import ClientOnlyTextPlane from './ClientOnlyTextPlane';
+import TeacherCallImage from './TeacherCallImage';
 import { useScroll } from '@/context/ScrollContext';
 
 const WelcomeSection = ({ welcomementorSpring, isExplorationMode }) => {
@@ -110,15 +109,7 @@ const WelcomeSection = ({ welcomementorSpring, isExplorationMode }) => {
           onPointerOver={handleScreenPointerOver}
           onPointerOut={handleScreenPointerOut}
         >
-          <RoundedBox
-            args={[3, 2, 0.1]}
-            radius={0.05}
-            smoothness={4}
-            bevelSegments={4}
-            creaseAngle={0.4}
-          >
-            <meshStandardMaterial color="#333333" />
-          </RoundedBox>
+          <TeacherCallImage />
         </animated.group>
 
         {/* Screen text - only visible on hover */}
@@ -148,5 +139,7 @@ const WelcomeSection = ({ welcomementorSpring, isExplorationMode }) => {
     </>
   );
 };
+
+
 
 export default WelcomeSection;

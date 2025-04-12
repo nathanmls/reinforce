@@ -23,13 +23,15 @@ export const en = {
     waitlist: 'Join Waitlist',
   },
   about: {
-    title: 'Revolutionizing Learning Support',
-    description: 'Reinforce is a cutting-edge SaaS platform that transforms the schooling support experience through immersive 3D characters, gamification, and AI-powered real-time conversations.',
+    title: 'Empowering Learning Through Open Source AI',
+    description: 'Reinforce is an open source platform that helps schools and educators leverage AI for personalized student support.',
     forStudentsTitle: 'For students,',
-    forStudentsDescription: 'we deliver fun, interactive, and highly personalized assistance to solve homework challenges and boost understanding in an engaging environment that makes learning exciting.',
+    forStudentsDescription: 'we aim to provide fun, interactive assistance with homework challenges in an engaging learning environment.',
     forSchoolsTitle: 'For schools and educators,',
-    forSchoolsDescription: 'we provide powerful insights on student performance and progress. Our platform seamlessly integrates with existing didactic materials, ensuring perfect alignment with your school\'s curriculum.',
-    quote: 'We\'re bridging the gap between cutting-edge technology and traditional teaching, creating a future where every student has access to personalized, engaging support whenever they need it.',
+    forSchoolsDescription: 'we offer tools to enhance teaching with AI, while keeping you in control of your data and curriculum.',
+    openSourceTitle: 'Completely open source,',
+    openSourceDescription: 'our platform can be self-hosted by any school, giving you full control over privacy and customization. Join our community to help shape the future of educational technology.',
+    quote: 'We believe AI should be an accessible tool for education, not a replacement for educators.',
     joinWaitlist: 'Join the Waitlist',
     discoverMore: 'Discover how it works',
     features: [
@@ -85,11 +87,6 @@ export const en = {
       description: 'Our team is here to help.',
       email: 'info@reinforce.com',
     },
-    phone: {
-      title: 'Phone',
-      hours: 'Mon-Fri 9am to 6pm',
-      number: '+55 (11) 99999-9999',
-    },
     form: {
       title: 'Send a Message',
       name: {
@@ -122,7 +119,6 @@ export const en = {
     profileImage: 'Profile Image',
     name: 'Name',
     email: 'Email',
-    phone: 'Phone',
     language: 'Language',
     notifications: 'Notifications',
     emailNotifications: 'Receive email notifications',
@@ -134,7 +130,9 @@ export const en = {
     errorUpdatingImage: 'Error updating profile image. Please try again.',
   },
   footer: {
-    rights: ' 2024 AI Mentor. All rights reserved.',
+    rights: ' 2024 Reinforce. An open-source AI education project.',
+    github: 'Contribute on GitHub',
+    contact: 'Join our community',
   },
   welcome: {
     title: 'Experience the Future of Education',

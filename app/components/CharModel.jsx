@@ -5,7 +5,7 @@ import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 
 export default function GirlModel() {
-  const { scene } = useGLTF('/models/GirlChar.glb');
+  const { scene } = useGLTF('/models/girl-char.glb');
 
   useEffect(() => {
     scene.traverse((child) => {
@@ -42,4 +42,4 @@ export default function GirlModel() {
 }
 
 // Preload the model
-useGLTF.preload('/models/GirlChar.glb');
+useGLTF.preload('/models/girl-char.glb');

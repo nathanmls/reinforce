@@ -11,7 +11,7 @@ import * as THREE from 'three';
 // List of all 3D models to preload
 const MODELS_TO_PRELOAD = [
   // Critical models (high priority - load first)
-  { path: '/models/GirlChar.glb', priority: 'high' },
+  { path: '/models/girl-char.glb', priority: 'high' },
 ];
 
 // Calculate total assets to load

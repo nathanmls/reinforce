@@ -187,10 +187,19 @@ export default function Footer() {
 
         {/* Copyright and Legal */}
         <div className="mt-10 md:mt-8 opacity-50 md:opacity-90 flex flex-col-reverse sm:flex-row justify-between w-full gap-6">
-          <p className="text-xs">
-            &copy; {new Date().getFullYear()} Reinforce. Todos os direitos
-            reservados.
-          </p>
+          <div className="flex flex-col gap-2">
+            <p className="text-xs">
+              &copy; {new Date().getFullYear()} Reinforce. An open-source AI education project.
+            </p>
+            <div className="flex gap-4 text-xs">
+              <a href="https://github.com/reinforce-project" className="hover:text-[#C7DF88]">
+                Contribute on GitHub
+              </a>
+              <a href="mailto:community@reinforce.com" className="hover:text-[#C7DF88]">
+                Join our community
+              </a>
+            </div>
+          </div>
           <div className="flex gap-6 text-xs">
             <Link href="/privacy-policy" className="hover:text-[#C7DF88]">
               Privacy Policy

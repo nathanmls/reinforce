@@ -42,6 +42,10 @@ export default function AboutUsSection({ language = 'en' }) {
                 <span className="font-semibold">{t.about.forSchoolsTitle}</span> {t.about.forSchoolsDescription}
               </p>
               
+              <p className="text-lg leading-8 text-black">
+                <span className="font-semibold">{t.about.openSourceTitle}</span> {t.about.openSourceDescription}
+              </p>
+              
               <p className="text-lg leading-8 text-black font-medium italic">
                 "{t.about.quote}"
               </p>

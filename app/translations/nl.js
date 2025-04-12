@@ -23,13 +23,15 @@ export const nl = {
     waitlist: 'Doe mee aan de Wachtlijst',
   },
   about: {
-    title: 'Revolutionaire Leerondersteuning',
-    description: 'Reinforce is een geavanceerd SaaS-platform dat de ervaring van schoolondersteuning transformeert door middel van meeslepende 3D-karakters, gamificatie en AI-gestuurde real-time gesprekken.',
+    title: 'Leren Versterkt door Open Source AI',
+    description: 'Reinforce is een open source platform dat scholen en docenten helpt AI te benutten voor gepersonaliseerde studentenondersteuning. Momenteel in MVP-testfase via onze wachtlijst.',
     forStudentsTitle: 'Voor studenten,',
-    forStudentsDescription: 'bieden we leuke, interactieve en zeer gepersonaliseerde hulp bij het oplossen van huiswerkuitdagingen en het verbeteren van begrip in een boeiende omgeving die leren spannend maakt.',
+    forStudentsDescription: 'streven we ernaar leuke, interactieve hulp te bieden bij huiswerkuitdagingen in een boeiende leeromgeving.',
     forSchoolsTitle: 'Voor scholen en docenten,',
-    forSchoolsDescription: 'bieden we krachtige inzichten in de prestaties en voortgang van leerlingen. Ons platform integreert naadloos met bestaande didactische materialen, waardoor perfecte afstemming met het curriculum van uw school wordt gegarandeerd.',
-    quote: 'We overbruggen de kloof tussen geavanceerde technologie en traditioneel onderwijs, en creëren een toekomst waarin elke student toegang heeft tot gepersonaliseerde, boeiende ondersteuning wanneer dat nodig is.',
+    forSchoolsDescription: 'bieden we tools aan om lesgeven te verbeteren met AI, terwijl u de controle houdt over uw gegevens en curriculum.',
+    openSourceTitle: 'Volledig open source,',
+    openSourceDescription: 'ons platform kan door elke school zelf worden gehost, waardoor u volledige controle heeft over privacy en aanpassingen. Word lid van onze community om mee te helpen de toekomst van onderwijstechnologie vorm te geven.',
+    quote: 'Wij geloven dat AI een toegankelijk hulpmiddel voor onderwijs moet zijn, geen vervanging voor geweldige leraren.',
     joinWaitlist: 'Doe mee aan de Wachtlijst',
     discoverMore: 'Ontdek hoe het werkt',
     features: [
@@ -87,11 +89,6 @@ export const nl = {
       description: 'Ons team staat voor u klaar.',
       email: 'info@reinforce.com',
     },
-    phone: {
-      title: 'Telefoon',
-      hours: 'Ma-Vr 9u tot 18u',
-      number: '+31 (6) 12345678',
-    },
     form: {
       title: 'Stuur een bericht',
       name: {
@@ -124,7 +121,6 @@ export const nl = {
     profileImage: 'Profielafbeelding',
     name: 'Naam',
     email: 'E-mail',
-    phone: 'Telefoon',
     language: 'Taal',
     notifications: 'Meldingen',
     emailNotifications: 'E-mailmeldingen ontvangen',
@@ -138,7 +134,9 @@ export const nl = {
       'Fout bij het bijwerken van profielafbeelding. Probeer het opnieuw.',
   },
   footer: {
-    rights: ' 2024 AI Mentor. Alle rechten voorbehouden.',
+    rights: ' 2024 Reinforce. Een open-source AI onderwijsproject.',
+    github: 'Draag bij op GitHub',
+    contact: 'Word lid van onze community',
   },
   welcome: {
     title: 'Ervaar de Toekomst van Onderwijs',

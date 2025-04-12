@@ -254,82 +254,32 @@ export default function PortalModel({
     clippingPlanes, 
     roughness, 
     metalness, 
-    envMapIntensity, 
-    normalScale, 
-    aoMapIntensity, 
+    envMapIntensity,
+    normalScale,
+    aoMapIntensity,
     emissiveIntensity
   ]);
-
-  // Handle animations
+    
+  // Set up idle animation when component mounts or animation state changes
   useEffect(() => {
     if (!actions || Object.keys(actions).length === 0) return;
     
-    // Log animation information once - using the hasLogged ref from above
-    if (process.env.NODE_ENV === 'development' && hasLogged.current) {
-      console.groupCollapsed(`🎬 Animations: ${modelPath.split('/').pop()}`);
-      console.log(`Available animations: ${names.join(', ')}`);
-      console.log(`Using: idle=${idleAnimation}, click=${clickAnimation}`);
-      console.groupEnd();
-      
-      // Set to false to prevent duplicate logging if this effect runs again
-      hasLogged.current = false;
-    }
+    console.log('Setting up animations with:', { idleAnimation, clickAnimation });
     
-    // Play idle animation in loop if specified
+    // Set up idle animation if specified and not in clicked state
     if (idleAnimation && actions[idleAnimation] && !isClicked) {
-      // Make sure to stop any currently playing animations first
+      // Stop all animations first
       Object.values(actions).forEach(action => {
-        if (action && action !== actions[idleAnimation]) {
-          action.stop();
-        }
+        if (action) action.stop();
       });
       
-      // Reset and play the idle animation with simple approach
+      // Configure and play idle animation
       const idleAction = actions[idleAnimation];
       idleAction.reset();
-      idleAction.play();
       idleAction.setLoop(THREE.LoopRepeat);
-      idleAction.timeScale = 1.0;
+      idleAction.play();
       
-      console.log(`Started playing idle animation: ${idleAnimation}`);
-    }
-    
-    // Reset click state when click animation completes
-    if (clickAnimation && actions[clickAnimation]) {
-      const clickAction = actions[clickAnimation];
-      
-      // Set up a listener for animation completion
-      if (clickAction.getMixer()) {
-        const mixer = clickAction.getMixer();
-        const onFinished = (e) => {
-          if (e.action === clickAction) {
-            console.log(`Click animation ${clickAnimation} finished`);
-            
-            // Play idle animation again after click animation completes
-            if (idleAnimation && actions[idleAnimation]) {
-              // Simple approach - just play the idle animation
-              const idleAction = actions[idleAnimation];
-              idleAction.reset();
-              idleAction.play();
-              idleAction.setLoop(THREE.LoopRepeat);
-            }
-            
-            // Reset click state
-            setIsClicked(false);
-            
-            // Call the completion callback
-            onAnimationComplete();
-            
-            // Remove the event listener
-            mixer.removeEventListener('finished', onFinished);
-          }
-        };
-        
-        // Add the event listener if we're clicked
-        if (isClicked) {
-          mixer.addEventListener('finished', onFinished);
-        }
-      }
+      console.log(`Playing idle animation: ${idleAnimation}`);
     }
     
     // Clean up animations on unmount
@@ -338,57 +288,67 @@ export default function PortalModel({
         if (action) action.stop();
       });
     };
-  }, [actions, names, idleAnimation, clickAnimation, isClicked, onAnimationComplete]);
+  }, [actions, idleAnimation, isClicked]);
   
-  // Handle click to play animation
+  // Handle click to play animation - SIMPLIFIED VERSION
   const handleClick = () => {
-    if (!actions || isClicked) return;
+    console.log('🔍 CLICK DETECTED: Animation click handler');
     
-    if (clickAnimation && actions[clickAnimation]) {
-      // Set clicked state first to prevent multiple clicks
-      setIsClicked(true);
+    // Basic validation
+    if (!actions || !clickAnimation || isClicked) {
+      console.log('⚠️ Cannot play animation - invalid state');
+      return;
+    }
+    
+    // Set clicked state
+    setIsClicked(true);
+    
+    try {
+      // ULTRA SIMPLE APPROACH: Just play the animation directly
+      console.log(`▶️ Playing animation: ${clickAnimation}`);
       
-      // Debug available animations
-      console.log('Available animations:', Object.keys(actions));
-      console.log(`Attempting to play animation: ${clickAnimation}`);
+      // Stop all current animations
+      Object.values(actions).forEach(action => action.stop());
       
-      // Stop the idle animation if it's playing
-      if (idleAnimation && actions[idleAnimation]) {
-        actions[idleAnimation].stop();
-      }
+      // Get the waving animation and configure it
+      const wavingAction = actions[clickAnimation];
+      wavingAction.reset();
+      wavingAction.setLoop(THREE.LoopOnce);
+      wavingAction.clampWhenFinished = true;
+      wavingAction.timeScale = 0.5;
       
-      // Play the click animation
-      const clickAction = actions[clickAnimation];
+      // Play it
+      wavingAction.play();
       
-      // Ensure the action exists and is valid
-      if (!clickAction) {
-        console.error(`Animation ${clickAnimation} not found!`);
-        setIsClicked(false);
-        return;
-      }
+      // Set a timeout to return to idle based on the animation duration
+      const animDuration = wavingAction.getClip().duration;
+      console.log(`⏱ Animation duration: ${animDuration} seconds`);
       
-      // Debug the animation state
-      console.log('Animation action:', clickAction);
-      console.log('Animation mixer:', clickAction.getMixer ? clickAction.getMixer() : 'No mixer');
-      
-      // Reset and configure the animation
-      clickAction.reset();
-      clickAction.setLoop(THREE.LoopOnce);
-      clickAction.clampWhenFinished = true;
-      clickAction.timeScale = 1.0;
-      clickAction.enabled = true;
-      clickAction.play();
-      
-      // Force a mixer update to ensure the animation starts
-      if (clickAction.getMixer) {
-        const mixer = clickAction.getMixer();
-        if (mixer) {
-          mixer.update(0);
-          console.log('Forced mixer update');
+      // Wait for animation to complete, then return to idle
+      setTimeout(() => {
+        console.log('🔄 Animation complete, returning to idle');
+        
+        // Stop the waving animation
+        wavingAction.stop();
+        
+        // Reset and play idle animation if available
+        if (idleAnimation && actions[idleAnimation]) {
+          const idleAction = actions[idleAnimation];
+          idleAction.reset();
+          idleAction.setLoop(THREE.LoopRepeat);
+          idleAction.play();
+          console.log(`▶️ Playing idle animation: ${idleAnimation}`);
         }
-      }
-      
-      console.log(`Playing click animation: ${clickAnimation}`);
+        
+        // Reset clicked state
+        setIsClicked(false);
+        
+        // Call the completion callback
+        onAnimationComplete();
+      }, (animDuration * 1000) + 100); // Animation duration + small buffer
+    } catch (error) {
+      console.error('🚨 Animation error:', error);
+      setIsClicked(false);
     }
   };
 

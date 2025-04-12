@@ -14,6 +14,18 @@ Built for schools and educators, Reinforce empowers educators with customized in
 
 Reinforce seeks to bridge the gap between technology and traditional teaching, creating a seamless educational experience that benefits students, teachers, and educational institutions.
 
+### 🏫 Self-Hosting for Schools
+
+Reinforce is committed to remaining as open source as possible, enabling schools to self-host the platform on their own infrastructure. This approach offers several key benefits:
+
+- **Data Privacy**: Schools maintain complete control over student data and interactions
+- **Customization**: Easily adapt the platform to specific educational needs and curricula
+- **Cost-Effective**: Eliminate subscription fees by hosting on your own servers
+- **Integration**: Seamlessly connect with existing school IT systems and databases
+- **Ownership**: Schools own their implementation and can modify it as needed
+
+By prioritizing self-hosting capabilities, Reinforce ensures that educational institutions of all sizes can implement and maintain their own AI-powered educational support system without dependency on external vendors or services.
+
 ### 🌟 Key Features
 
 - **AI-Powered Mentoring**: Real-time homework help and subject understanding
@@ -149,6 +161,7 @@ reinforce/
 - **Mouse-Following Camera**: Added subtle camera movements based on mouse position for enhanced immersion
 - **Reusable 3D Components**: Created modular and reusable components like PortalModel for easier development
 - **Client-Side Rendering Optimizations**: Added client-only wrapper components to prevent SSR issues with Three.js
+- **Enhanced Self-Hosting Support**: Improved documentation and configuration options for schools to self-host
 
 ## 🤝 Contributing
 
@@ -161,6 +174,16 @@ Contributions are welcome! Here's how you can contribute:
 5. Open a Pull Request
 
 Please make sure to update tests as appropriate and follow the code style guidelines.
+
+### 🌐 Open Source Philosophy
+
+Reinforce is dedicated to the open source model and welcomes contributions that enhance the platform's accessibility, particularly for educational institutions. We especially value contributions that:
+
+- Improve self-hosting capabilities
+- Enhance documentation for school IT administrators
+- Reduce dependencies on proprietary services
+- Optimize performance on modest hardware configurations
+- Add features that benefit educational environments
 
 ## 🔒 Security
 

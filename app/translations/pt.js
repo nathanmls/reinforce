@@ -23,13 +23,15 @@ export const pt = {
     waitlist: 'Entre na Lista de Espera',
   },
   about: {
-    title: 'Revolucionando o Suporte ao Aprendizado',
-    description: 'Reinforce é uma plataforma SaaS de ponta que transforma a experiência de apoio escolar através de personagens 3D imersivos, gamificação e conversas em tempo real com IA.',
+    title: 'Aprendizado Potencializado por IA Open Source',
+    description: 'Reinforce é uma plataforma open source que ajuda escolas e educadores a aproveitar a IA para suporte estudantil personalizado. Atualmente em fase de teste MVP através da nossa lista de espera.',
     forStudentsTitle: 'Para os estudantes,',
-    forStudentsDescription: 'oferecemos assistência divertida, interativa e altamente personalizada para resolver desafios de tarefas e aumentar a compreensão em um ambiente envolvente que torna o aprendizado empolgante.',
+    forStudentsDescription: 'buscamos fornecer assistência divertida e interativa com desafios de tarefas em um ambiente de aprendizado envolvente.',
     forSchoolsTitle: 'Para escolas e educadores,',
-    forSchoolsDescription: 'fornecemos insights poderosos sobre o desempenho e progresso dos alunos. Nossa plataforma se integra perfeitamente com materiais didáticos existentes, garantindo alinhamento perfeito com o currículo da sua escola.',
-    quote: 'Estamos preenchendo a lacuna entre tecnologia de ponta e ensino tradicional, criando um futuro onde cada estudante tem acesso a suporte personalizado e envolvente sempre que precisar.',
+    forSchoolsDescription: 'oferecemos ferramentas para aprimorar o ensino com IA, mantendo você no controle dos seus dados e currículo.',
+    openSourceTitle: 'Completamente open source,',
+    openSourceDescription: 'nossa plataforma pode ser auto-hospedada por qualquer escola, dando a você controle total sobre privacidade e customização. Junte-se à nossa comunidade para ajudar a moldar o futuro da tecnologia educacional.',
+    quote: 'Acreditamos que a IA deve ser uma ferramenta acessível para educação, não um substituto para ótimos professores.',
     joinWaitlist: 'Entre na Lista de Espera',
     discoverMore: 'Descubra como funciona',
     features: [
@@ -87,11 +89,6 @@ export const pt = {
       description: 'Nossa equipe está aqui para ajudar.',
       email: 'info@reinforce.com',
     },
-    phone: {
-      title: 'Telefone',
-      hours: 'Seg-Sex das 9h às 18h',
-      number: '+55 (11) 99999-9999',
-    },
     form: {
       title: 'Envie uma mensagem',
       name: {
@@ -124,7 +121,6 @@ export const pt = {
     profileImage: 'Imagem do Perfil',
     name: 'Nome',
     email: 'Email',
-    phone: 'Telefone',
     language: 'Idioma',
     notifications: 'Notificações',
     emailNotifications: 'Receber notificações por email',
@@ -138,7 +134,9 @@ export const pt = {
       'Erro ao atualizar imagem do perfil. Por favor, tente novamente.',
   },
   footer: {
-    rights: ' 2024 AI Mentor. Todos os direitos reservados.',
+    rights: ' 2024 Reinforce. Um projeto de educação em IA open-source.',
+    github: 'Contribua no GitHub',
+    contact: 'Junte-se à nossa comunidade',
   },
   welcome: {
     title: 'Transformando o Futuro da Educação',

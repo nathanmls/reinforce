@@ -82,29 +82,6 @@ export default function ContactSection({ language = 'en' }) {
                   </a>
                 </div>
               </div>
-
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#C7DF88]/20">
-                    <PhoneIcon
-                      className="h-6 w-6 text-[#5A1A8A]"
-                      aria-hidden="true"
-                    />
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">
-                    {t.contact.phone.title}
-                  </h3>
-                  <p className="mt-1 text-gray-600">{t.contact.phone.hours}</p>
-                  <a
-                    href={`tel:${t.contact.phone.number}`}
-                    className="mt-2 block text-[#5A1A8A] font-medium hover:text-[#C7DF88]"
-                  >
-                    {t.contact.phone.number}
-                  </a>
-                </div>
-              </div>
             </div>
           </div>
 

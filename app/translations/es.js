@@ -24,7 +24,7 @@ export const es = {
   },
   about: {
     title: 'Revolucionando el Apoyo al Aprendizaje',
-    description: 'Reinforce es una plataforma SaaS de vanguardia que transforma la experiencia de apoyo escolar a través de personajes 3D inmersivos, gamificación y conversaciones en tiempo real impulsadas por IA.',
+    description: 'Reinforce es una plataforma open source de vanguardia que transforma la experiencia de apoyo escolar a través de personajes 3D inmersivos, gamificación y conversaciones en tiempo real con IA.',
     forStudentsTitle: 'Para los estudiantes,',
     forStudentsDescription: 'ofrecemos asistencia divertida, interactiva y altamente personalizada para resolver desafíos de tareas y mejorar la comprensión en un entorno atractivo que hace que el aprendizaje sea emocionante.',
     forSchoolsTitle: 'Para escuelas y educadores,',
@@ -86,11 +86,6 @@ export const es = {
       description: 'Nuestro equipo está aquí para ayudar.',
       email: 'info@reinforce.com',
     },
-    phone: {
-      title: 'Teléfono',
-      hours: 'Lun-Vie 9am a 6pm',
-      number: '+34 (91) 12345678',
-    },
     form: {
       title: 'Enviar un mensaje',
       name: {
@@ -123,7 +118,6 @@ export const es = {
     profileImage: 'Imagen de Perfil',
     name: 'Nombre',
     email: 'Correo',
-    phone: 'Teléfono',
     language: 'Idioma',
     notifications: 'Notificaciones',
     emailNotifications: 'Recibir notificaciones por correo electrónico',
